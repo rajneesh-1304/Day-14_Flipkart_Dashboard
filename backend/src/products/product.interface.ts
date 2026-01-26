@@ -4,13 +4,18 @@ export interface Products{
     description:string;
     price: number;
     rating: number;
-    image:string;
+    image:string[];
     category:string;
+    subcategory:string;
+    quantity:number;
+    isActive:boolean;
+    createdAt:Date;
 }
 
 export interface Querry{
-    title: string;
+    title?: string,
     limit:number, 
     skip:number,
-    category:string;
+    category?:string,
+    subcategory?:string,
 }

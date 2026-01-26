@@ -1,22 +1,14 @@
 "use client";
 
-import { useForm } from "react-hook-form";
+import { useForm, Controller } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
-import { useDispatch } from "react-redux";
-// import { addProductThunk, fetchProductsThunk } from "@/app/redux/features/product/productSlice";
-import { AppDispatch } from "@/app/redux/store";
-import "./addproduct.css";
-import {
-  Box,
-  Button,
-  FormControl,
-  IconButton,
-  InputAdornment,
-  TextField,
-} from "@mui/material";
-import { Visibility, VisibilityOff } from "@mui/icons-material";
+import { useDispatch, useSelector } from "react-redux";
+import { AppDispatch, RootState } from "@/app/redux/store";
 import { addProductThunk } from "@/app/redux/features/products/productSlice";
+import { Box, Button, FormControl, Snackbar, TextField } from "@mui/material";
+import "./addproduct.css";
+import { useState } from "react";
 
 type AddProductModalProps = {
   onClose: () => void;
@@ -24,44 +16,72 @@ type AddProductModalProps = {
 
 const productSchema = z.object({
   title: z.string().min(3, "Title must be at least 3 characters"),
-  price: z
-    .string()
-    .min(1, { message: "Price is required" }),
-  category: z.string().min(2, "Category must be at least 2 characters"),
-  image: z.string().url("Must be a valid URL"),
   description: z.string().min(10, "Description must be at least 10 characters"),
+  price: z.number({ invalid_type_error: "Price must be a number" }).positive(),
+  category: z.string().min(2, "Category must be at least 2 characters"),
+  subcategory: z.string().min(2, "Subcategory must be at least 2 characters"),
+  quantity: z.number().min(1, "Quantity must be at least 1"),
+  images: z
+    .any()
+    .refine((files: FileList) => files?.length > 0 && files?.length <= 4, {
+      message: "Please upload 1 to 4 images",
+    }),
 });
 
 type ProductFormData = z.infer<typeof productSchema>;
 
 export default function AddProductModal({ onClose }: AddProductModalProps) {
   const dispatch = useDispatch<AppDispatch>();
-
+  const [snackbarOpen, setSnackbarOpen] = useState(false);
+  const [snackbarMessage, setSnackbarMessage] = useState("");
+  const user = useSelector((state: RootState) => state.users.currentUser);
   const {
     register,
     handleSubmit,
     formState: { errors },
     reset,
+    control,
   } = useForm<ProductFormData>({
     resolver: zodResolver(productSchema),
+    defaultValues: {
+      quantity: 1,
+    },
   });
 
-  const onSubmit = async (data: ProductFormData) => {
-    console.log("Adding product:", data);
-    const productData = {
-        title:data.title,
-        price:data.price,
-        category:data.category,
-        image:data.image,
-        description:data.description,
-        rating:0,
+  const onSubmit = async (formData: ProductFormData) => {
+    const formDataToSend = new FormData();
+    formDataToSend.append("title", formData.title);
+    formDataToSend.append("description", formData.description);
+    formDataToSend.append("price", formData.price.toString());
+    formDataToSend.append("category", formData.category);
+    formDataToSend.append("subcategory", formData.subcategory);
+    formDataToSend.append("quantity", formData.quantity.toString());
+    formDataToSend.append("sellerId", user?.id);
+
+    Array.from(formData.images).forEach(file => {
+      formDataToSend.append("images", file);
+    });
+
+    try {
+      await dispatch(addProductThunk(formDataToSend)).unwrap();
+      setSnackbarMessage("Product added successfully!");
+      setSnackbarOpen(true);
+      setTimeout(() => {
+        onClose();
+      }, 1000);
+    } catch (error: any) {
+      setSnackbarMessage(error.message || "Error in adding product");
+      setSnackbarOpen(true);
     }
-
-    dispatch(addProductThunk(productData));
-
     reset();
-    onClose();
   };
+
+
+  const handleClose = (event: React.SyntheticEvent | Event, reason?: string) => {
+    if (reason === "clickaway") return;
+    setSnackbarOpen(false);
+  };
+
 
   return (
     <div className="modal_overlay">
@@ -72,17 +92,18 @@ export default function AddProductModal({ onClose }: AddProductModalProps) {
             sx={{
               display: "flex",
               flexDirection: "column",
-              width: 300,
-              gap: 1.5,
+              width: 350,
+              gap: 0.75,
             }}
           >
             <FormControl variant="standard">
               <TextField
                 label="Title"
                 variant="outlined"
-                {...register("title", { required: "Title is required" })}
+                size="small"
+                {...register("title")}
                 error={!!errors.title}
-                helperText={errors.title ? errors.title.message : ""}
+                helperText={errors.title?.message}
               />
             </FormControl>
 
@@ -90,38 +111,22 @@ export default function AddProductModal({ onClose }: AddProductModalProps) {
               <TextField
                 label="Description"
                 variant="outlined"
-                {...register("description", {
-                  required: "Description is required",
-                })}
+                size="small"
+                {...register("description")}
                 error={!!errors.description}
-                helperText={
-                  errors.description ? errors.description.message : ""
-                }
+                helperText={errors.description?.message}
               />
             </FormControl>
 
             <FormControl variant="standard">
               <TextField
                 label="Price"
+                type="number"
+                size="small"
                 variant="outlined"
-                inputProps={{
-                min: 0,
-                id: "distance-input",
-                style: { textAlign: "center" },
-              }}
-                {...register("price", { required: "Price is required" })}
+                {...register("price", { valueAsNumber: true })}
                 error={!!errors.price}
-                helperText={errors.price ? errors.price.message : ""}
-              />
-            </FormControl>
-
-            <FormControl variant="standard">
-              <TextField
-                label="Image"
-                variant="outlined"
-                {...register("image", { required: "Price is required" })}
-                error={!!errors.image}
-                helperText={errors.image ? errors.image.message : ""}
+                helperText={errors.price?.message}
               />
             </FormControl>
 
@@ -129,25 +134,67 @@ export default function AddProductModal({ onClose }: AddProductModalProps) {
               <TextField
                 label="Category"
                 variant="outlined"
-                {...register("category", { required: "Price is required" })}
+                size="small"
+                {...register("category")}
                 error={!!errors.category}
-                helperText={errors.category ? errors.category.message : ""}
+                helperText={errors.category?.message}
               />
             </FormControl>
 
+            <FormControl variant="standard">
+              <TextField
+                label="Subcategory"
+                variant="outlined"
+                size="small"
+                {...register("subcategory")}
+                error={!!errors.subcategory}
+                helperText={errors.subcategory?.message}
+              />
+            </FormControl>
+
+            <FormControl variant="standard">
+              <TextField
+                label="Quantity"
+                type="number"
+                variant="outlined"
+                size="small"
+                {...register("quantity", { valueAsNumber: true })}
+                error={!!errors.quantity}
+                helperText={errors.quantity?.message}
+              />
+            </FormControl>
+
+            <FormControl variant="standard">
+              <label style={{ fontSize: 14, marginBottom: 4 }}>
+                Upload Images (1 to 4)
+              </label>
+              <Controller
+                name="images"
+                control={control}
+                render={({ field }) => (
+                  <input
+                    type="file"
+                    multiple
+                    accept="image/*"
+                    onChange={(e) => field.onChange(e.target.files)}
+                  />
+                )}
+              />
+              {errors.images && (
+                <p style={{ color: "red", fontSize: 12 }}>
+                  {errors.images.message as string}
+                </p>
+              )}
+            </FormControl>
+
             <div className="modal_actions">
-              <Button
-                variant="contained"
-                sx={{ mt: 2, width: 200 }}
-                type="submit"
-              >
+              <Button variant="contained" sx={{ mt: 1, width: 200 }} type="submit">
                 Add
               </Button>
-
               <Button
-                variant="contained"
-                sx={{ mt: 2, width: 200 }}
-                onClick={()=>onClose()}
+                variant="outlined"
+                sx={{ mt: 1, width: 200 }}
+                onClick={() => onClose()}
               >
                 Cancel
               </Button>
@@ -155,6 +202,12 @@ export default function AddProductModal({ onClose }: AddProductModalProps) {
           </Box>
         </form>
       </div>
+      <Snackbar
+        open={snackbarOpen}
+        autoHideDuration={2000}
+        onClose={handleClose}
+        message={snackbarMessage}
+      />
     </div>
   );
 }

@@ -12,12 +12,25 @@ export const addProduct= async (productData:any)=>{
   }
 }
 
-export const getProducts = async (limit=10, skip=0, searchVal='', searchProd='')=>{
+export const getProducts = async (limit=10, page = 1, searchVal?: string,
+  category?: string,
+  subcategory?:string)=>{
   try {
-    const res = await axios.get(`${BASE_URL}?limit=${limit}&skip=${skip}&title=${searchVal}&category=${searchProd}`);
+    const url = `${BASE_URL}?limit=${limit}&page=${page}&title=${searchVal}&category=${category}&subcategory=${subcategory}`;
+    const res = await axios.get(url);
     return res.data;
   } catch (error) {
     console.error("Error in Fetching Data", error);
       throw error;
   }
 }
+
+export const banProduct = async (productId: number) => {
+  const res = await axios.patch(`${BASE_URL}/ban/${productId}`);
+  return res.data;
+};
+
+export const unbanProduct = async (productId: number) => {
+  const res = await axios.patch(`${BASE_URL}/unban/${productId}`);
+  return res.data;
+};

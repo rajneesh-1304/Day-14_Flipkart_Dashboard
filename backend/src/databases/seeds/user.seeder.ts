@@ -12,7 +12,7 @@ export default class UserSeeder implements Seeder {
         email: "admin@gmail.com",
         password: "12345678",
         name: "Admin",
-        role: "admin",
+        role: "ADMIN",
       },
     ]);
     const userFactory = factoryManager.get(User);

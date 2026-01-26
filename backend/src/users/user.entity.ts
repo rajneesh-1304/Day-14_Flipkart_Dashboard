@@ -14,6 +14,9 @@ export class User {
   @Column()
   password: string;
 
-  @Column({ default: 'USER' })
-  role: string;
+  @Column({ default: 'CUSTOMER' })
+  role: 'ADMIN' | 'SELLER' | 'CUSTOMER';
+
+  @Column({ default: false })
+  is_banned: boolean;
 }

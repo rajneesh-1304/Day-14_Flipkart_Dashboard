@@ -1,9 +1,11 @@
 'use client';
-import Authentication from '@/app/login/page'
+import Product from './dashboard/Product/Product';
 
+export default function Home() {
 
-export default function Home(){
-  return(
-    <Authentication/>
+  return (
+    <>
+      <Product/>
+    </>
   )
 }

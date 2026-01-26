@@ -7,7 +7,7 @@ import InputAdornment from "@mui/material/InputAdornment";
 import { useSelector, useDispatch } from "react-redux";
 import { useForm } from "react-hook-form";
 import "./register.css";
-import { email, nanoid, z } from "zod";
+import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Fragment, useEffect, useState } from "react";
 import TextField from "@mui/material/TextField";
@@ -22,8 +22,9 @@ import { createUserWithEmailAndPassword, signInWithPopup } from "firebase/auth";
 import { collection, addDoc, serverTimestamp, setDoc, doc } from "firebase/firestore";
 import { useRouter } from "next/navigation";
 import { AppDispatch } from "@/app/redux/store";
-import { registerThunk } from "@/app/redux/features/users/userSlice";
+import { loginThunk, registerThunk } from "@/app/redux/features/users/userSlice";
 import { FormHelperText } from "@mui/material";
+import '../../register/registerpage.css'
 
 const RegisterUserSchema = z.object({
   name: z
@@ -58,38 +59,56 @@ export default function RegisterForm() {
   const [snackbarOpen, setSnackbarOpen] = useState(false);
   const [snackbarMessage, setSnackbarMessage] = useState("");
 
- 
+
   const handleClose = (event: React.SyntheticEvent | Event, reason?: string) => {
     if (reason === "clickaway") {
       return;
     }
     setSnackbarOpen(false);
   };
-  const handleSignIn = async () => {
+    const handleSignIn = async () => {
     try {
       const result = await signInWithPopup(auth, provider);
       const user = result.user;
-
+  
       if (!user.email) {
-        throw "Google account has no email";
+        throw new Error("Google account has no email");
       }
-
-      const userData = {
+  
+      const loginData = {
+        email: user.email,
+        password: "Google@123",
+      };
+  
+      const loginResponse = await dispatch(loginThunk(loginData));
+  
+      if (loginThunk.fulfilled.match(loginResponse)) {
+        setSnackbarMessage("Login successful!");
+        setSnackbarOpen(true);
+        router.push('/')
+  
+        return;
+      }
+  
+      const registerData = {
         name: user.email.split("@")[0],
         email: user.email,
         password: "Google@123",
-        role: "customer",
+        role: "CUSTOMER",
       };
-
-      const response = await dispatch(registerThunk(userData));
-
-      if (response.type === "auth/register/fulfilled") {
-        setSnackbarMessage("User Registered successfully!");
+  
+      const registerResponse = await dispatch(registerThunk(registerData));
+  
+      if (!registerThunk.fulfilled.match(registerResponse)) {
+        throw new Error("Registration failed");
+      }
+  
+      const finalLogin = await dispatch(loginThunk(loginData));
+  
+      if (loginThunk.fulfilled.match(finalLogin)) {
+        setSnackbarMessage("Account created & logged in!");
         setSnackbarOpen(true);
-        setTimeout(() => router.push("/welcome"), 1200);
-      } else {
-        setSnackbarMessage("Registration failed");
-        setSnackbarOpen(true);
+        router.push('/')
       }
     } catch (error) {
       console.error(error);
@@ -100,14 +119,11 @@ export default function RegisterForm() {
 
   const onSubmit = async (data: RegisterFormInputs) => {
     try {
-      if (data.role === '') {
-        throw "Role should not be empty";
-      }
       const response = await dispatch(registerThunk(data));
       if (response.type === 'auth/register/fulfilled') {
         setSnackbarMessage('User Registered Successfully!');
         setSnackbarOpen(true);
-        setTimeout(() => router.push('/'), 2000);
+        setTimeout(() => router.push('/login'), 2000);
       } else {
         setSnackbarMessage(response.payload);
         setSnackbarOpen(true);
@@ -134,9 +150,9 @@ export default function RegisterForm() {
   });
 
 
-   useEffect(()=>{
+  useEffect(() => {
     console.log(errors)
-  },[errors])
+  }, [errors])
 
 
   return (
@@ -147,14 +163,15 @@ export default function RegisterForm() {
             display: "flex",
             flexDirection: "column",
             width: 300,
-            gap: 1.5,
+            gap: 0.5,
           }}
         >
 
           <FormControl variant="standard">
             <TextField
               label="Name"
-              variant="outlined"
+              variant="standard"
+              size="small"
               {...register("name", { required: "Name is required" })}
               error={!!errors.name}
               helperText={errors.name ? errors.name.message : ""}
@@ -164,7 +181,8 @@ export default function RegisterForm() {
           <FormControl variant="standard">
             <TextField
               label="Email"
-              variant="outlined"
+              size="small"
+              variant="standard"
               {...register("email", { required: "Email is required" })}
               error={!!errors.email}
               helperText={errors.email ? errors.email.message : ""}
@@ -174,8 +192,9 @@ export default function RegisterForm() {
           <FormControl variant="standard" fullWidth>
             <TextField
               label="Password"
+              size="small"
               type={showPassword ? "text" : "password"}
-              variant="outlined"
+              variant="standard"
               {...register("password", { required: "Password is required" })}
               error={!!errors.password}
               helperText={errors.password ? errors.password.message : ""}
@@ -190,39 +209,49 @@ export default function RegisterForm() {
               }}
             />
           </FormControl>
+          <FormControl
+            fullWidth
+            variant="standard"
+            size="small"
+            error={!!errors.role}
+          >
+            <InputLabel
+              id="demo-simple-select-standard-label"
+              sx={{ fontSize: 14 }}
+            >
+              Role
+            </InputLabel>
 
-            <FormControl fullWidth error>
-              <InputLabel id="demo-simple-select-label">Role</InputLabel>
-              <Select
-                labelId="demo-simple-select-label"
-                label="Role"
-                id="demo-simple-select"
-                {...register("role")}
-                error={!!errors.role}
-                slotProps={
-                  {
+            <Select
+              labelId="demo-simple-select-standard-label"
+              id="demo-simple-select-standard"
+              {...register("role")}
+              sx={{
+                minHeight: 32,
+                paddingY: "2px",
+              }}
+            >
+              <MenuItem value="SELLER">Seller</MenuItem>
+              <MenuItem value="CUSTOMER">Customer</MenuItem>
+            </Select>
 
-                  }
-                }
-              >
-                <MenuItem value="seller">Seller</MenuItem>
-                <MenuItem value="customer">Customer</MenuItem>
-              </Select>
-                <FormHelperText>With label + helper text</FormHelperText>
-            </FormControl>
- 
+            <FormHelperText sx={{ fontSize: 11, mt: 0.5 }}>
+              {errors.role?.message}
+            </FormHelperText>
+          </FormControl>
 
-          <Button variant="contained" sx={{ mt: 1.5, mb: 2 }} type="submit">
+
+          <Button variant="contained" sx={{ mt: 1.5, mb: 1 }} type="submit">
             Register
           </Button>
         </Box>
       </form>
-      <Button variant="contained" sx={{ mt: 2, borderRadius: "500px", width: 300, }} onClick={handleSignIn}>
+      <Button variant="contained" sx={{ mt: 1.5, borderRadius: "500px", width: 300, }} onClick={handleSignIn}>
         Sign in With Google
       </Button>
 
       <div
-        className='login'><p>Already Registered <span className='login_link' onClick={() => { router.push('/') }}>Login</span></p>
+        className='login'><p>Already Registered <span className='login_link' onClick={() => { router.push('/login') }}>Login</span></p>
       </div>
       <Snackbar
         open={snackbarOpen}

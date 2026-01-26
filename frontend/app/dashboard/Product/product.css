@@ -1,23 +1,24 @@
-/* Product component styles */
-.prod{
-    display: grid;
-  grid-template-columns: auto auto auto auto auto;
-  justify-content: center;
-  margin: 50px ;
-  margin-top: 100px;
-  gap: 30px;
-}
-/* Container for all products */
+/* ===== PAGE ===== */
 .home {
   display: flex;
   flex-direction: column;
-  gap: 20px;
   padding: 20px;
+  gap: 40px;
+  background: #f9fafb;
 }
 
-/* Carousel */
+/* ===== PRODUCT GRID ===== */
+.prod {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+  gap: 30px;
+  margin: 0 50px 50px;
+}
+
 .relative {
   position: relative;
+  margin-bottom: 40px;
+  max-height: 220px;
 }
 
 .overflow-hidden {
@@ -29,88 +30,177 @@
 }
 
 .transition-transform {
-  transition: transform 0.3s ease-in-out;
+  transition: transform 0.4s ease-in-out;
 }
 
-/* Carousel buttons */
 .button {
   cursor: pointer;
   border: none;
   outline: none;
   background-color: rgba(0, 0, 0, 0.6);
   color: white;
-  font-size: 1.5rem;
-  padding: 0.5rem 0.8rem;
+  font-size: 1.3rem;
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
   position: absolute;
   top: 50%;
   transform: translateY(-50%);
   z-index: 10;
 }
 
-button:hover {
-  background-color: rgba(0, 0, 0, 0.8);
+.button:hover {
+  background-color: rgba(0, 0, 0, 0.85);
 }
 
-button:disabled {
-  background-color: rgba(0, 0, 0, 0.3);
-  cursor: not-allowed;
+.button:first-of-type {
+  left: 8px;
 }
 
-button:first-of-type {
-  left: 0;
+.button:last-of-type {
+  right: 8px;
 }
 
-button:last-of-type {
-  right: 0;
+.relative .flex-shrink-0 {
+  padding: 6px;
 }
 
-/* Product card inside carousel */
-.flex-shrink-0 {
-  flex-shrink: 0;
+.relative .card {
+  box-shadow: 0 4px 12px rgba(0,0,0,0.08);
 }
 
-.bg-white {
-  background-color: #fff;
+.relative .card_image {
+  height: 120px; 
 }
 
-.rounded {
-  border-radius: 10px;
+.relative .card_body {
+  padding: 8px;
 }
 
-.shadow {
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+.relative .property {
+  font-size: 0.85rem;
 }
 
-.p-2 {
-  padding: 10px;
+.relative .amount {
+  font-size: 0.85rem;
 }
 
-.card_image img,
+.card {
+  background: #ffffff;
+  border-radius: 14px;
+  overflow: hidden;
+  box-shadow: 0 8px 20px rgba(0,0,0,0.08);
+  transition: transform 0.25s ease, box-shadow 0.25s ease;
+  cursor: pointer;
+}
+
+.card_image {
+  width: 100%;
+  height: 200px;
+  overflow: hidden;
+}
+
 .card_img {
   width: 100%;
-  height: 150px;
+  height: 100%;
   object-fit: cover;
-  border-radius: 10px;
 }
 
-.property,
-.amount {
+/* Body */
+.card_body {
+  padding: 14px;
+}
+
+.property {
+  font-size: 0.95rem;
   font-weight: 600;
-  margin: 5px 0;
+  margin-bottom: 4px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.category {
+  font-size: 0.8rem;
+  color: #777;
+  margin-bottom: 8px;
 }
 
 .price {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  margin-top: 5px;
 }
 
-.card {
-  background-color: #fff;
-  border-radius: 10px;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+.amount {
+  font-weight: 700;
+  color: #16a34a;
+}
+
+.rating {
+  font-size: 0.85rem;
+  color: #f59e0b;
+}
+
+
+.carousel-card {
+  background: #fff;
+  border-radius: 12px;
+  padding: 12px;
+  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.08);
+  text-align: center;
+  height: 100%;
+  width: 500px; 
+  box-sizing: border-box; 
+}
+
+.carousel-img {
+  width: 100%;
+  height: 160px;
+  object-fit: cover;
+  border-radius: 8px;
+}
+
+.carousel-title {
+  margin-top: 8px;
+  font-size: 14px;
+  font-weight: 600;
+}
+
+.carousel-price {
+  font-size: 13px;
+  color: #444;
+}
+
+.carousel-btn {
+  position: absolute;
+  top: 50%;
+  transform: translateY(-50%);
+  background: rgba(0, 0, 0, 0.6);
+  color: white;
+  border: none;
+  padding: 8px 12px;
+  border-radius: 50%;
+  cursor: pointer;
+}
+
+.carousel-btn.left {
+  left: 8px;
+}
+
+.carousel-btn.right {
+  right: 8px;
+}
+
+.add_to_cart_btn {
+  margin-top: 10px;
+  width: 100%;
   padding: 10px;
-  margin-bottom: 10px;
+  background: #ae7427;
+  color: #fff;
+  border: none;
+  border-radius: 8px;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
 }
-

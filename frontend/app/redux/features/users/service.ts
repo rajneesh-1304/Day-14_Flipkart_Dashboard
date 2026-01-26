@@ -3,7 +3,8 @@ const BASE_URL = "http://localhost:3001/auth";
 
 export const loginUser= async (loginData:any)=>{
          try{
-            const res= await axios.post(BASE_URL, loginData);
+            const url="http://localhost:3001/auth/login"
+            const res= await axios.post(url, loginData);
             return res.data;
         }catch (error) {
       console.error("Error in Reigstering User:", error);
@@ -21,3 +22,18 @@ export const registerUser= async (registerData : any)=>{
       throw error;
     }
 }
+
+export const fetchAllUsers = async () => {
+  const response = await axios.get('http://localhost:3001/auth'); 
+  return response.data;
+};
+
+export const banUser = async (userId: number) => {
+  const response = await axios.patch(`http://localhost:3001/auth/ban/${userId}`);
+  return response.data;
+};
+
+export const unbanUser = async (userId: number) => {
+  const response = await axios.patch(`http://localhost:3001/auth/unban/${userId}`);
+  return response.data;
+};

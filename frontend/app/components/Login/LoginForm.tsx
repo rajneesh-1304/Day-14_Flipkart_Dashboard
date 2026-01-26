@@ -14,9 +14,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { useRouter } from "next/navigation";
 import "./login.css";
 import { auth, db, provider } from "../../config/firebase";
-import { signInWithEmailAndPassword, signInWithPopup } from "firebase/auth";
-import { doc, getDoc, setDoc } from "firebase/firestore";
-import Link from "next/link";
+import { signInWithPopup } from "firebase/auth";
 import { useDispatch } from "react-redux";
 import { AppDispatch } from "@/app/redux/store";
 import { loginThunk, registerThunk } from "@/app/redux/features/users/userSlice";
@@ -63,52 +61,70 @@ export default function LoginForm() {
   const handleTogglePassword = () => setShowPassword((prev) => !prev);
 
   const handleSignIn = async () => {
-    try {
-      const result = await signInWithPopup(auth, provider);
-      const user = result.user;
+  try {
+    const result = await signInWithPopup(auth, provider);
+    const user = result.user;
 
-      if (!user.email) {
-        throw "Google account has no email";
-      }
-
-      const userData = {
-        name: user.email.split("@")[0],
-        email: user.email,
-        password: "Google@123",
-        role: "customer",
-      };
-
-      const response = await dispatch(registerThunk(userData));
-
-      if (response.type === "auth/register/fulfilled") {
-        setSnackbarMessage("User Registered successfully!");
-        setSnackbarOpen(true);
-        setTimeout(() => router.push("/dashboard"), 1200);
-      } else {
-        setSnackbarMessage("Registration failed");
-        setSnackbarOpen(true);
-      }
-    } catch (error) {
-      console.error(error);
-      setSnackbarMessage("Google sign-in failed");
-      setSnackbarOpen(true);
+    if (!user.email) {
+      throw new Error("Google account has no email");
     }
-  };
+
+    const loginData = {
+      email: user.email,
+      password: "Google@123",
+    };
+
+    const loginResponse = await dispatch(loginThunk(loginData));
+
+    if (loginThunk.fulfilled.match(loginResponse)) {
+      setSnackbarMessage("Login successful!");
+      setSnackbarOpen(true);
+      router.push('/')
+
+      return;
+    }
+
+    const registerData = {
+      name: user.email.split("@")[0],
+      email: user.email,
+      password: "Google@123",
+      role: "CUSTOMER",
+    };
+
+    const registerResponse = await dispatch(registerThunk(registerData));
+
+    if (!registerThunk.fulfilled.match(registerResponse)) {
+      throw new Error("Registration failed");
+    }
+
+    const finalLogin = await dispatch(loginThunk(loginData));
+
+    if (loginThunk.fulfilled.match(finalLogin)) {
+      setSnackbarMessage("Account created & logged in!");
+      setSnackbarOpen(true);
+      router.push('/')
+    }
+  } catch (error) {
+    console.error(error);
+    setSnackbarMessage("Google sign-in failed");
+    setSnackbarOpen(true);
+  }
+};
+
 
   const onSubmit = async (data: LoginFormInputs) => {
     try {
       const response = await dispatch(loginThunk(data));
-      console.log(response)
       if (response.type === 'auth/rejected') {
         setSnackbarMessage(response.payload);
         setSnackbarOpen(true);
       } else {
 
-        if (response.payload.role === 'customer') {
+        if (response.payload.user.role === 'CUSTOMER') {
           setSnackbarMessage("Login successful!");
           setSnackbarOpen(true);
-          setTimeout(() => router.push("/dashboard"), 1200);
-        } else if (response.payload.role === 'seller') {
+          setTimeout(() => router.push("/"), 1200);
+        } else if (response.payload.user.role === 'SELLER') {
           setSnackbarMessage("Login successful!");
           setSnackbarOpen(true);
           setTimeout(() => router.push("/seller"), 1200);
@@ -119,7 +135,6 @@ export default function LoginForm() {
         }
       }
     } catch (error) {
-      console.error(error);
       setSnackbarMessage("User not registered");
       setSnackbarOpen(true);
     }
@@ -132,7 +147,7 @@ export default function LoginForm() {
           <FormControl variant="standard">
             <TextField
               label="Email"
-              variant="outlined"
+              variant="standard"
               {...register("email")}
               error={!!errors.email}
               helperText={errors.email ? errors.email.message : ""}
@@ -143,7 +158,7 @@ export default function LoginForm() {
             <TextField
               label="Password"
               type={showPassword ? "text" : "password"}
-              variant="outlined"
+              variant="standard"
               {...register("password")}
               error={!!errors.password}
               helperText={errors.password ? errors.password.message : ""}
@@ -167,7 +182,7 @@ export default function LoginForm() {
 
       <Button
         variant="contained"
-        sx={{ mt: 8, width: 300, borderRadius: "500px" }}
+        sx={{ mt: 4, width: 300, borderRadius: "500px" }}
         onClick={handleSignIn}
       >
         Sign in With Google

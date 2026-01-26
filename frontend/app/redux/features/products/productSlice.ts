@@ -1,5 +1,5 @@
 import { createSlice, createAsyncThunk, PayloadAction } from "@reduxjs/toolkit";
-import { addProduct, getProducts } from "./productService";
+import { addProduct, banProduct, getProducts, unbanProduct } from "./productService";
 
 interface Product {
   id: number;
@@ -25,16 +25,16 @@ const initialState: ProductState = {
   total: 0,
 };
 
-interface Pagination {
-  limit:number;
-  skip:number;
-}
-
 export const fetchProductsThunk = createAsyncThunk(
   "products/fetchProducts",
-  async ({ limit, skip, title, category }, { rejectWithValue }) => {
+  async ({ limit = 10,
+    page = 1,
+    searchValue,
+    category,
+    subcategory }: { limit?: number; page?: number; searchValue?: string; category?: string; subcategory?: string }, { rejectWithValue }) => {
     try {
-      const data = await productService.getProducts(limit, skip, title, category);
+      console.log("Hello")
+      const data = await getProducts(limit, page, searchValue, category, subcategory);
       return data;
     } catch (err: any) {
       return rejectWithValue(err.response?.data?.message || err.message);
@@ -44,18 +44,19 @@ export const fetchProductsThunk = createAsyncThunk(
 
 export const addProductThunk = createAsyncThunk(
   "products/addproduct",
-  async (productData,{rejectWithValue}) => {
+  async (productData, { rejectWithValue }) => {
     try {
-          return await addProduct(productData);
-        } catch (err: any) {
-          return rejectWithValue(err.response.data.message);
-        }
+      console.log('aaa', productData)
+      return await addProduct(productData);
+    } catch (err: any) {
+      return rejectWithValue(err.response.data.message);
+    }
   }
 );
 
 export const getProductThunk = createAsyncThunk(
   'products',
-  async({limit, skip, searchVal, searchProd})=>{
+  async ({ limit, skip, searchVal, searchProd }) => {
     try {
 
       return await getProducts(limit, skip, searchVal, searchProd);
@@ -63,6 +64,32 @@ export const getProductThunk = createAsyncThunk(
     }
   }
 )
+
+export const banProductThunk = createAsyncThunk(
+  'products/banProduct',
+  async (productId: number, { rejectWithValue }) => {
+    try {
+      return await banProduct(productId);
+    } catch (err: any) {
+      return rejectWithValue(
+        err.response?.data?.message || 'Failed to ban product'
+      );
+    }
+  }
+);
+
+export const unbanProductThunk = createAsyncThunk(
+  'products/unbanProduct',
+  async (productId: number, { rejectWithValue }) => {
+    try {
+      return await unbanProduct(productId);
+    } catch (err: any) {
+      return rejectWithValue(
+        err.response?.data?.message || 'Failed to unban product'
+      );
+    }
+  }
+);
 
 const productSlice = createSlice({
   name: "products",
@@ -81,9 +108,10 @@ const productSlice = createSlice({
         state.loading = true;
         state.error = null;
       })
-      .addCase(fetchProductsThunk.fulfilled, (state, action) => {
+      .addCase(fetchProductsThunk.fulfilled, (state, action: PayloadAction<{ data: Product[]; total: number }>) => {
         state.loading = false;
-        state.productData = action.payload.result;
+        state.productData = action.payload.data;
+        console.log('action', action.payload.data)
         state.total = action.payload.total;
       })
       .addCase(fetchProductsThunk.rejected, (state, action) => {
@@ -96,7 +124,7 @@ const productSlice = createSlice({
       })
       .addCase(addProductThunk.fulfilled, (state, action: PayloadAction<any>) => {
         state.loading = false;
-        state.productData.push(action.payload); 
+        state.productData.push(action.payload);
         state.total += 1;
       })
       .addCase(addProductThunk.rejected, (state, action) => {
@@ -109,12 +137,44 @@ const productSlice = createSlice({
       })
       .addCase(getProductThunk.fulfilled, (state, action: PayloadAction<any>) => {
         state.loading = false;
-        state.productData.push(action.payload); 
+        state.productData.push(action.payload);
       })
       .addCase(getProductThunk.rejected, (state, action) => {
         state.loading = false;
         state.error = action.error.message || "Failed to Fetch product";
-      })  
+      })
+      .addCase(banProductThunk.pending, (state) => {
+        state.loading = true;
+        state.error = null;
+      })
+      .addCase(banProductThunk.fulfilled, (state, action: PayloadAction<any>) => {
+        state.loading = false;
+        state.productData = state.productData.map(product =>
+          product.id === action.payload.id
+            ? { ...product, is_banned: !action.payload.isActive }
+            : product
+        );
+      })
+      .addCase(banProductThunk.rejected, (state, action) => {
+        state.loading = false;
+        state.error = action.payload as string;
+      })
+      .addCase(unbanProductThunk.pending, (state) => {
+        state.loading = true;
+        state.error = null;
+      })
+      .addCase(unbanProductThunk.fulfilled, (state, action: PayloadAction<any>) => {
+        state.loading = false;
+        state.productData = state.productData.map(product =>
+          product.id === action.payload.id
+            ? { ...product, is_banned: !action.payload.isActive }
+            : product
+        );
+      })
+      .addCase(unbanProductThunk.rejected, (state, action) => {
+        state.loading = false;
+        state.error = action.payload as string;
+      });
   },
 });
 

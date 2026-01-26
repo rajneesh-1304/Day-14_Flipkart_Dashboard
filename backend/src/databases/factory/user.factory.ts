@@ -5,7 +5,7 @@ export default setSeederFactory(User, (faker) => {
   user.name = faker.person.firstName();
   user.email = faker.internet.email();
   user.password = "12345678";
-  user.role = "admin";
+  user.role = "ADMIN";
   return user;
 });
 

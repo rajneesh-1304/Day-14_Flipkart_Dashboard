@@ -13,6 +13,11 @@ import {
 import storage from "redux-persist/lib/storage";
 import usersReducer from "./features/users/userSlice";
 import productReducer from './features/products/productSlice'
+import sellerReducer from './features/seller/sellerSlice'
+import searchReducer from './features/search/searchSlice'
+import cartReducer from './features/cart/cartSlice'
+import addressReducer from './features/address/addressSlice'
+import orderReducer from './features/order/orderSlice'
 
 const persistConfig = {
   key: "root",
@@ -23,6 +28,11 @@ const persistConfig = {
 const rootReducer = combineReducers({
   users: usersReducer,
   products: productReducer,
+  seller: sellerReducer,
+  search:searchReducer,
+  cart: cartReducer,
+  address: addressReducer,
+  order: orderReducer
 });
 
 const persistedReducer = persistReducer(persistConfig, rootReducer);

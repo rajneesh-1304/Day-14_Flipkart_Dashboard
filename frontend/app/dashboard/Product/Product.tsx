@@ -1,147 +1,174 @@
 'use client';
 
 import { useEffect, useState } from 'react';
-// import { getProduct, getProductById, getProductByTitle, getProductByPagination, fetchProducts } from '@/app/lib/api';
-import { useRouter } from 'next/router';
-import { addProduct } from '@/app/redux/features/products/productService';
-import {  getProductThunk } from '@/app/redux/features/products/productSlice';
-import './product.css'
 import { useDispatch } from 'react-redux';
-export default function Product({searchValue, searchProduct}) {
-  const [product, setProduct] = useState<any[]>([]);
-  const [currentPage, setCurrentPage] = useState(1);
-  const [totalProducts, setTotalProducts] = useState(0);
-  const dispatch=useDispatch();
-//   const router =useRouter();
-  const itemsPerPage = 10;
-  const totalPages = Math.ceil(totalProducts / itemsPerPage);
-//   const loadProducts = async ()=>{
-//     const data = await getProduct();
-//     setProduct(data);
-//   }
-// //   const handleClick=(id:any)=>{
-// //         router.push(`/product/${id}`)
-// //     }
-  const fetchProd = async (currentPage, itemsPerPage, searchVal, searchProd) => {
-    try {
-      const response = await dispatch(getProductThunk({currentPage, itemsPerPage, searchVal, searchProd}));
-      console.log('response: ', response.payload);
-      setProduct(response.payload);
-    //   setTotalProducts(response.length);
-    } catch (error) {
-      console.error('Error fetching products:', error);
-    }
+import { useAppSelector } from '@/app/redux/hooks';
+import { fetchProductsThunk } from '@/app/redux/features/products/productSlice';
+import { addToCartThunk } from '@/app/redux/features/cart/cartSlice';
+import Snackbar from '@mui/material/Snackbar';
+import Alert from '@mui/material/Alert';
+import './product.css';
+
+const LIMIT = 10;
+
+export default function Product() {
+  const dispatch = useDispatch();
+
+  const userId = useAppSelector((state) => state.users.currentUser?.id);
+  const products = useAppSelector((state) => state.products.productData);
+  const total = useAppSelector((state) => state.products.total);
+  const { searchValue, category, subcategory } = useAppSelector((state) => state.search);
+
+  const [snackbar, setSnackbar] = useState<{ message: string, type: 'success' | 'error' } | null>(null);
+
+  const showSnackbar = (message: string, type: 'success' | 'error') => {
+    setSnackbar({ message, type });
   };
 
-//   useEffect(() => {
-//     loadProducts();
-//   }, []);
+  const handleCloseSnackbar = () => {
+    setSnackbar(null);
+  };
+
+  const [page, setPage] = useState(1);
+  const totalPages = Math.ceil(total / LIMIT);
+
+  const [debouncedSearch, setDebouncedSearch] = useState(searchValue);
+  const [debouncedCategory, setDebouncedCategory] = useState(category);
+  const [debouncedSubcategory, setDebouncedSubcategory] = useState(subcategory);
+
+  useEffect(() => {
+    const handler = setTimeout(() => {
+      setDebouncedSearch(searchValue);
+      setDebouncedCategory(category);
+      setDebouncedSubcategory(subcategory);
+      setPage(1);
+    }, 1000);
+
+    return () => clearTimeout(handler);
+  }, [searchValue, category, subcategory]);
+
+  useEffect(() => {
+    dispatch(
+      fetchProductsThunk({
+        page,
+        limit: LIMIT,
+        searchValue: debouncedSearch,
+        category: debouncedCategory,
+        subcategory: debouncedSubcategory,
+      })
+    );
+  }, [dispatch, page, debouncedSearch, debouncedCategory, debouncedSubcategory]);
+
   const [carouselIndex, setCarouselIndex] = useState(0);
-  const visibleItems = 4; // how many items visible in carousel at a time
+  const visibleItems = 4;
 
   const prevSlide = () => setCarouselIndex((prev) => Math.max(prev - 1, 0));
   const nextSlide = () =>
-    setCarouselIndex((prev) => Math.min(prev + 1, product.length - visibleItems));
-
-useEffect(()=>{
-    fetchProd(currentPage, itemsPerPage, searchValue, searchProduct);
-  }, [currentPage, searchProduct, searchValue]);
+    setCarouselIndex((prev) => Math.min(prev + 1, products.length - visibleItems));
 
   useEffect(() => {
     const interval = setInterval(() => {
-      setCarouselIndex((prev) =>
-        prev < product.length - visibleItems ? prev + 1 : 0
-      );
-    }, 3000); // change slide every 3 seconds
+      setCarouselIndex((prev) => (prev < products.length - visibleItems ? prev + 1 : 0));
+    }, 3000);
+    return () => clearInterval(interval);
+  }, [products]);
 
-    return () => clearInterval(interval); // cleanup on unmount
-  }, [product]);
-
-//   useEffect(()=>{
-//     fetchProd(currentPage);
-//   }, [searchValue, currentPage]);
   return (
-    <>
-      <div className="home">
-        <div className="relative w-full mb-6">
-          <div className="overflow-hidden">
-            <div
-              className="flex transition-transform duration-300"
-              style={{
-                transform: `translateX(-${(100 / visibleItems) * carouselIndex}%)`,
-              }}
-            >
-              {product.map((p, idx) => (
-                <div
-                  key={idx}
-                  className="flex-shrink-0 p-2"
-                  style={{ width: `${100 / visibleItems}%` }}
-                >
-                  <div className="bg-white rounded shadow p-2">
-                    <img
-                      src={p.image}
-                      alt={p.title}
-                      className="w-full h-40 object-cover rounded"
-                    />
-                    <h3 className="mt-2 font-semibold">{p.title}</h3>
-                    <p>${p.price}</p>
-                  </div>
+    <div className="home">
+      <div className="relative w-full mb-8">
+        <div className="overflow-hidden">
+          <div
+            className="flex transition-transform duration-500 gap-4"
+            style={{ transform: `translateX(-${(100 / visibleItems) * carouselIndex}%)` }}
+          >
+            {products.map((p, idx) => (
+              <div key={idx} className="flex-shrink-0" style={{ width: `${100 / visibleItems}%` }}>
+                <div className="carousel-card">
+                  <img
+                    src={Array.isArray(p.images) && p.images.length > 0 ? p.images[0] : '/no-image.png'}
+                    alt={p.title}
+                    className="carousel-img"
+                  />
+                  <h3 className="carousel-title">{p.title}</h3>
+                  <p className="carousel-price">₹ {p.price}</p>
                 </div>
-              ))}
-            </div>
+              </div>
+            ))}
           </div>
-
-          {/* Prev / Next buttons */}
-          <button
-            onClick={prevSlide}
-            className="button absolute left-0 top-1/2 -translate-y-1/2 bg-gray-700 text-white p-2 rounded-full"
-          >
-            &#10094;
-          </button>
-          <button
-            onClick={nextSlide}
-            className="button absolute right-0 top-1/2 -translate-y-1/2 bg-gray-700 text-white p-2 rounded-full"
-          >
-            &#10095;
-          </button>
         </div>
-        <div className='prod'>
-        {product?.map((p, idx) => (
-          <div className='card' key={idx}>
-            <div className='card_image'><img className='card_img' src={p.image} alt="" /></div>
-            <div className='property'>{p.title}</div>
-            <div>
-                {/* <button className='product_detail' onClick={()=>handleClick(p.id)}>Product Detail</button> */}
-            </div>
-            <div className='price'>
-                <p className='amount'>$ {p.price}</p>
-                <p>{p.category}</p>
-                {/* <button className='cart_button' onClick={addItem}>
-                    {added ? '✅ Added' : '🛒 Add'}
-                </button> */}
-            </div>
-        </div>
-        ))}
-      </div>
-
-      <div className="pagination">
-        <button
-          disabled={currentPage === 1}
-          onClick={() => setCurrentPage((prev) => prev - 1)}
-        >
-          Prev
+        <button onClick={prevSlide} className="carousel-btn left">
+          &#10094;
         </button>
-
-        <span> Page {currentPage} of {totalPages}</span>
-
-        <button
-          disabled={currentPage === totalPages}
-          onClick={() => setCurrentPage((prev) => prev + 1)}
-        >
-          Next
+        <button onClick={nextSlide} className="carousel-btn right">
+          &#10095;
         </button>
       </div>
+
+      <div className="prod">
+        {products.length > 0 ? (
+          products.map((p, idx) => (
+            <div className="card" key={idx}>
+              <div className="card_image">
+                <img className="card_img" src={p.images} alt={p.title} />
+              </div>
+              <div className="card_body">
+                <h3 className="property">{p.title}</h3>
+                <p className="category">{p.category}</p>
+                <div className="price">
+                  <span className="amount">₹ {p.price}</span>
+                  <span className="rating">⭐ {p.rating || 0}</span>
+                </div>
+                <button
+                  className="add_to_cart_btn"
+                  onClick={async () => {
+                    if (!userId) {
+                      showSnackbar('Please login first', 'error');
+                      return;
+                    }
+                    try {
+                      await dispatch(addToCartThunk({ userId, productId: p.id, quantity: 1 })).unwrap();
+                      showSnackbar('Added to cart ✅', 'success');
+                    } catch (error) {
+                      showSnackbar('Failed to add to cart ❌', 'error');
+                      console.error(error);
+                    }
+                  }}
+                >
+                  Add to Cart
+                </button>
+              </div>
+            </div>
+          ))
+        ) : (
+          <p>No products found.</p>
+        )}
       </div>
-    </>
+
+      {totalPages > 1 && (
+        <div className="pagination">
+          <button disabled={page === 1} onClick={() => setPage((p) => p - 1)}>
+            Prev
+          </button>
+          <span>
+            Page {page} of {totalPages}
+          </span>
+          <button disabled={page === totalPages} onClick={() => setPage((p) => p + 1)}>
+            Next
+          </button>
+        </div>
+      )}
+
+      {/* MUI Snackbar */}
+      <Snackbar
+        open={!!snackbar}
+        autoHideDuration={3000}
+        onClose={handleCloseSnackbar}
+        anchorOrigin={{ vertical: 'bottom', horizontal: 'center' }}
+      >
+        <Alert onClose={handleCloseSnackbar} severity={snackbar?.type || 'success'} sx={{ width: '100%' }}>
+          {snackbar?.message || ''}
+        </Alert>
+      </Snackbar>
+    </div>
   );
 }

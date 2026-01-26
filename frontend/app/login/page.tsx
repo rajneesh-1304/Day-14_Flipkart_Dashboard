@@ -1,9 +1,8 @@
 'use client';
-
 import LoginForm from '../components/Login/LoginForm';
 import './login.css';
 
-const Login = () => {
+const login = () => {
   return (
     <div className='login_container'>
       <div className='register_formm'>
@@ -22,4 +21,4 @@ const Login = () => {
   )
 }
 
-export default Login
+export default login

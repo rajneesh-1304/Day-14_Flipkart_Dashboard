@@ -1,11 +1,12 @@
-import { BadRequestException, ConflictException, Injectable, NotFoundException } from '@nestjs/common';
-import { Users, Querry } from './user.interface';
+import { BadRequestException, ConflictException, ForbiddenException, Injectable, NotFoundException } from '@nestjs/common';
+import { Users } from './user.interface';
 import { DataSource } from 'typeorm';
 import { User } from './user.entity';
+import bcrypt from 'bcrypt';
 
 @Injectable()
 export class UserService {
-  constructor(private readonly dataSource: DataSource) {}
+  constructor(private readonly dataSource: DataSource) { }
 
   async register(data) {
     const userRepo = this.dataSource.getRepository(User);
@@ -15,10 +16,14 @@ export class UserService {
 
     if (data.password.length < 8) throw new BadRequestException('Password must be at least 8 characters');
 
+    if (data.role === 'ADMIN') {
+      throw new ForbiddenException("Cannot register as admin");
+    }
+    const hashedPassword = await bcrypt.hash(data.password, 10);
     const user = userRepo.create({
       name: data.name,
       email: data.email,
-      password: data.password,
+      password: hashedPassword,
       role: data.role,
     });
 
@@ -26,81 +31,56 @@ export class UserService {
     return { message: 'User registered successfully' };
   }
 
-  // register(data:any ){
-  //   const email = this.users.find((e)=> e.email === data.email);
-  //   if(email){
-  //     throw new ConflictException(
-  //       'Email is already completed',
-  //     );
-  //   }
-
-  //   if(data.password.length <8){
-  //     throw new BadRequestException('Password is less than 8 digits');
-  //   }
-
-  //   if(data.role === 'Admin'){
-  //     throw new BadRequestException('Cannot select Admin');
-  //   }
-  //   const id=Date.now();
-
-  //   const user:Users = {
-  //     id:id,
-  //     name:data.name,
-  //     email:data.email,
-  //     password:data.password,
-  //     role:data.role,
-  //   }
-
-  //   this.users.push(user);
-  //   console.log('Register Successfully');
-  //   return {
-  //     message: 'User registered successfully',
-  //   };
-  // }
-
-  async login(data){
-    const userRepo=this.dataSource.getRepository(User);
-    const user = await userRepo.findOne({where : {email:data.email}});
+  async login(data) {
+    const userRepo = this.dataSource.getRepository(User);
+    const user = await userRepo.findOne({ where: { email: data.email } });
     if (!user) throw new NotFoundException('User not found');
 
-    if (user.password !== data.password) {
-    throw new BadRequestException('Incorrect password');   
+    if(user.is_banned){
+      throw new ForbiddenException('User is banned');
+    }
+
+    const isMatchPassword=await bcrypt.compare(data.password, user.password);
+    if(!isMatchPassword){
+      throw new BadRequestException('Incorrect Password');
+    }
+    return {
+      message: 'User logged in successfully',
+      user: {
+        id: user.id,
+        name: user.name,
+        email: user.email,
+        role: user.role,
+      },
+    };
   }
-  return { message: 'User logged in successfully',
-    role:user.role,
-    user: {
-      id: user.id,
-      name: user.name,
-      email: user.email,
-      role: user.role,
-    },
-   };
-  }
-
-  // login(data: any) {
-  //   const user = this.users.find((e) => e.email === data.email);
-
-  //   if (!user) {
-  //     throw new NotFoundException(
-  //       'User Not Registered',
-  //     );
-  //   }
-
-  //   if (user.password !== data.password) {
-  //     throw new BadRequestException(
-  //       'Incorrect Password',
-  //     );
-  //   }
-  //   console.log("User logged in Successfully");
-
-  //   return {
-  //     message: "User Login Successfully"
-  //   };
-  // }
 
   async getAll() {
     const userRepo = this.dataSource.getRepository(User);
     return await userRepo.find();
   }
+
+  async banUser(id:number){
+    const userRepo = this.dataSource.getRepository(User);
+    const user = await userRepo.findOne({where :{id}});
+    if(!user){
+      throw new NotFoundException("User not found");
+    }
+    await userRepo.update({ id }, { is_banned: true });
+    return {message: "User banned successfully"};
+  }
+
+  async unbanUser(id: number) {
+  const userRepo = this.dataSource.getRepository(User);
+  
+  const user = await userRepo.findOne({ where: { id } });
+  if (!user) {
+    throw new NotFoundException("User not found");
+  }
+
+  await userRepo.update({ id }, { is_banned: false });
+
+  return { message: "User unbanned successfully" };
+}
 
 }

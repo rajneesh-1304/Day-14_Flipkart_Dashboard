@@ -1,11 +1,18 @@
 import { Module, Controller, Get } from '@nestjs/common';
-import { UserController } from './users/user.controller';
-import { UserService } from './users/user.service';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { User } from './users/user.entity';
 import { Products } from './products/product.entity';
-import { ProductController } from './products/product.controller';
-import { ProductService } from './products/product.service';
+import { UserModule } from './users/user.module';
+import { ProductModule } from './products/product.module';
+import { AddressModule } from './address/address.module';
+import { Address } from './address/address.entity';
+import { Cart } from './cart/entities/cart.entity';
+import { CartItem } from './cart/entities/cartitem.entity';
+import { CartModule } from './cart/cart.module';
+import { Order } from './orders/entities/order.entity';
+import { OrderItem } from './orders/entities/order-item.entity';
+import { OrderTracking } from './orders/entities/order-tracking.entity';
+import { OrderModule } from './orders/order.module';
 
 @Controller() 
 class AppController {
@@ -24,12 +31,16 @@ class AppController {
       username: 'postgres',
       password: '1234',
       database: 'auth_db',
-      entities: [User, Products],
+      entities: [User, Products, Address, Cart, CartItem, Order, OrderItem, OrderTracking],
       synchronize: false,
       migrations: [__dirname + '/migrations/*{.ts,.js}'],
     }),
+    UserModule,
+    ProductModule,
+    AddressModule,
+    CartModule,
+    OrderModule
   ],
-  controllers: [UserController, ProductController, AppController],
-  providers: [UserService, ProductService],
+  controllers: [AppController],
 })
 export class AppModule {}
