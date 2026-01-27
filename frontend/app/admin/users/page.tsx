@@ -11,7 +11,7 @@ export default function CustomersPage() {
 
   const { userData, loading } = useAppSelector(state => state.users);
 
-  const customersOnly = userData.filter(user => user.role === 'CUSTOMER');
+  const customersOnly = userData.filter((user : any) => user.role === 'CUSTOMER');
 
   const [snackbarOpen, setSnackbarOpen] = useState(false);
   const [snackbarMsg, setSnackbarMsg] = useState('');
@@ -52,7 +52,7 @@ export default function CustomersPage() {
       {!customersOnly.length ? (
         <div className="admin-empty">No customers found</div>
       ) : (
-        customersOnly.map(customer => (
+        customersOnly.map((customer : any) => (
           <div key={customer.id} className="admin-row">
             <div>
               <strong>{customer.name}</strong>

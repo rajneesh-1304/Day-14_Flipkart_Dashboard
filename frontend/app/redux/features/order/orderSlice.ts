@@ -21,6 +21,13 @@ export const fetchUserOrdersThunk = createAsyncThunk(
   }
 );
 
+export const fetchAllOrderThunk = createAsyncThunk(
+  'orders/fetchAllOrders',
+  async () => {
+    return await getAllOrders();
+  }
+)
+
 export const fetchOrderByIdThunk = createAsyncThunk(
   'orders/fetchById',
   async (orderId: number) => {

@@ -36,7 +36,7 @@ export class CartService {
     return cart;
   }
 
-  async addToCart(userId:number, productId:number, quantity:number){
+  async addToCart(userId:number, productId:number, quantity:number, sellerId:number){
     if(quantity<=0){
         throw new BadRequestException('Quantity must be greater than 0');
     }
@@ -71,6 +71,7 @@ export class CartService {
         cart,
         product,
         quantity,
+        sellerId,
       });
       await this.cartItemRepo.save(cartItem);
     }

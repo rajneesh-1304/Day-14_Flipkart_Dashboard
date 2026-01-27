@@ -23,6 +23,12 @@ export class OrderController {
     return this.orderService.getUserOrders(userId);
   }
 
+  @Get('order')
+  getOrders(){
+    return this.orderService.getOrders();
+  }
+
+
   @Get(':orderId')
   getOrderById(@Param('orderId') orderId: number) {
     return this.orderService.getOrderById(orderId);
@@ -39,5 +45,10 @@ export class OrderController {
   @Patch(':orderId/cancel')
   cancelOrder(@Param('orderId') orderId: number) {
     return this.orderService.cancelOrder(orderId);
+  }
+
+  @Get('order/:id')
+  getOrderBySellerId(@Param('id') id :string){
+    return this.orderService.getOrderBySellerId(+id);
   }
 }

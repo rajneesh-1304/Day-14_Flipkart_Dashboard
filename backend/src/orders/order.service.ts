@@ -10,6 +10,7 @@ import { CartItem } from '../cart/entities/cartitem.entity';
 import { Order } from './entities/order.entity';
 import { OrderItem } from './entities/order-item.entity';
 import { OrderTracking } from './entities/order-tracking.entity';
+import { Products } from 'src/products/product.entity';
 
 @Injectable()
 export class OrderService {
@@ -27,6 +28,9 @@ export class OrderService {
 
     @InjectRepository(Cart)
     private readonly cartRepo: Repository<Cart>,
+
+    @InjectRepository(Products)
+    private readonly productsRepo: Repository<Products>,
 
     @InjectRepository(CartItem)
     private readonly cartItemRepo: Repository<CartItem>,
@@ -49,7 +53,7 @@ export class OrderService {
 
       let totalAmount = 0;
 
-      const orderItems = cart.items.map(item => {
+      const orderItems = cart.items.map((item) => {
         totalAmount += Number(item.product.price) * item.quantity;
 
         return this.orderItemRepo.create({
@@ -57,6 +61,7 @@ export class OrderService {
           productName: item.product.title,
           price: item.product.price,
           quantity: item.quantity,
+          sellerId: item.sellerId,
         });
       });
 
@@ -97,6 +102,10 @@ export class OrderService {
     });
   }
 
+  async getOrders() {
+    return this.orderRepo.find();
+  }
+
   async getOrderById(orderId: number) {
     const order = await this.orderRepo.findOne({
       where: { id: orderId },
@@ -109,7 +118,10 @@ export class OrderService {
     return order;
   }
 
-  async updateOrderStatus(orderId: number, status) {
+  async updateOrderStatus(
+    orderId: number,
+    status: 'INPROCESS' | 'CANCELLED' | 'SHIPPED',
+  ) {
     const order = await this.orderRepo.findOne({
       where: { id: orderId },
       relations: ['tracking'],
@@ -145,9 +157,7 @@ export class OrderService {
     }
 
     if (order.status !== 'INPROCESS') {
-      throw new BadRequestException(
-        'Only INPROCESS orders can be cancelled',
-      );
+      throw new BadRequestException('Only INPROCESS orders can be cancelled');
     }
 
     order.status = 'CANCELLED';
@@ -159,5 +169,12 @@ export class OrderService {
     });
 
     return order;
+  }
+
+  async getOrderBySellerId(id: number) {
+    const orderItems = await this.orderItemRepo.find({
+      where: { sellerId: id },
+    });
+    return orderItems;
   }
 }

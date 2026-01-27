@@ -17,7 +17,7 @@ type AddProductModalProps = {
 const productSchema = z.object({
   title: z.string().min(3, "Title must be at least 3 characters"),
   description: z.string().min(10, "Description must be at least 10 characters"),
-  price: z.number({ invalid_type_error: "Price must be a number" }).positive(),
+  price: z.number().positive(),
   category: z.string().min(2, "Category must be at least 2 characters"),
   subcategory: z.string().min(2, "Subcategory must be at least 2 characters"),
   quantity: z.number().min(1, "Quantity must be at least 1"),
@@ -49,6 +49,7 @@ export default function AddProductModal({ onClose }: AddProductModalProps) {
   });
 
   const onSubmit = async (formData: ProductFormData) => {
+    
     const formDataToSend = new FormData();
     formDataToSend.append("title", formData.title);
     formDataToSend.append("description", formData.description);
@@ -56,7 +57,7 @@ export default function AddProductModal({ onClose }: AddProductModalProps) {
     formDataToSend.append("category", formData.category);
     formDataToSend.append("subcategory", formData.subcategory);
     formDataToSend.append("quantity", formData.quantity.toString());
-    formDataToSend.append("sellerId", user?.id);
+    formDataToSend.append("sellerId", String(user.id));
 
     Array.from(formData.images).forEach(file => {
       formDataToSend.append("images", file);

@@ -86,7 +86,9 @@ export default function CartPage() {
     }
 
     setPlacingOrder(true);
-
+    if (!userId) {
+  return; 
+}
     await dispatch(
       addAddressThunk({
         ...addressForm,

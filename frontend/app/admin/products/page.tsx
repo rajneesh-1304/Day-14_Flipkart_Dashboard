@@ -14,8 +14,11 @@ export default function ProductsPage() {
   const dispatch = useAppDispatch();
   const { loading, total } = useAppSelector(state => state.products);
   const products = useAppSelector(state =>
-    state.products.productData.map(p => ({ ...p, is_banned: !p.isActive }))
-  );
+  state.products.productData.map((p: any) => ({
+    ...p,
+    is_banned: !p.isActive,
+  }))
+);
 
   const [snackbarOpen, setSnackbarOpen] = useState(false);
   const [snackbarMsg, setSnackbarMsg] = useState('');
@@ -66,7 +69,7 @@ export default function ProductsPage() {
         <div className="admin-empty">No products found</div>
       ) : (
         <>
-          {products.map(product => (
+          {products.map((product : any) => (
             <div key={product.id} className="admin-row">
               <div className="admin-info">
                 <strong>{product.title}</strong>

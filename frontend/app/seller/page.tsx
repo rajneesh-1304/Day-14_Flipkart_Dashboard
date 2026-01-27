@@ -5,6 +5,7 @@ import { useAppSelector } from '../redux/hooks';
 import { useDispatch } from 'react-redux';
 import { fetchSellerProductsThunk } from '../redux/features/seller/sellerSlice';
 import Card from '../components/SellerCard/SellerCard';
+import { useRouter } from 'next/navigation';
 
 const LIMIT = 10;
 
@@ -14,7 +15,7 @@ const Page = () => {
   const products = useAppSelector((state) => state.seller.products);
   const total = useAppSelector((state) => state.seller.total);
   const { searchValue, category, subcategory } = useAppSelector((state) => state.search);
-
+  const router=useRouter();
 
   const [page, setPage] = useState(1);
 
@@ -55,6 +56,8 @@ const Page = () => {
       <h2 style={{ fontSize: '1.5rem', marginBottom: '1rem' }}>
         Welcome, <strong>{currentUser?.name}</strong> (Seller) 👋
       </h2>
+
+      <div><button onClick={()=>router.push('/seller/order')}>View Orders</button></div>
 
       <div style={{ display: 'flex', flexWrap: 'wrap', gap: '1rem' }}>
         {products && products.length > 0 ? (

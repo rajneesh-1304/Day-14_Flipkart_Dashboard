@@ -17,8 +17,10 @@ export class CartController {
         @Body('userId') userId: string,
         @Body('productId') productId: string,
         @Body('quantity') quantity: string,
+        @Body('sellerId') sellerId: string
     ) {
-        return this.cartService.addToCart(+userId, +productId, +quantity);
+        console.log(sellerId)
+        return this.cartService.addToCart(+userId, +productId, +quantity, +sellerId);
     }
 
     @Patch('update/:itemId')

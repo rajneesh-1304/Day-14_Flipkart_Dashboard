@@ -13,8 +13,10 @@ import { Order } from './orders/entities/order.entity';
 import { OrderItem } from './orders/entities/order-item.entity';
 import { OrderTracking } from './orders/entities/order-tracking.entity';
 import { OrderModule } from './orders/order.module';
+import { Wishlist } from './wishlist/wishlist.entity';
+import { WishlistModule } from './wishlist/wishlist.module';
 
-@Controller() 
+@Controller()
 class AppController {
   @Get()
   root() {
@@ -29,9 +31,19 @@ class AppController {
       host: 'localhost',
       port: 5432,
       username: 'postgres',
-      password: '1234',
+      password: 'admin',
       database: 'auth_db',
-      entities: [User, Products, Address, Cart, CartItem, Order, OrderItem, OrderTracking],
+      entities: [
+        User,
+        Products,
+        Address,
+        Cart,
+        CartItem,
+        Order,
+        OrderItem,
+        OrderTracking,
+        Wishlist,
+      ],
       synchronize: false,
       migrations: [__dirname + '/migrations/*{.ts,.js}'],
     }),
@@ -39,7 +51,8 @@ class AppController {
     ProductModule,
     AddressModule,
     CartModule,
-    OrderModule
+    OrderModule,
+    WishlistModule,
   ],
   controllers: [AppController],
 })

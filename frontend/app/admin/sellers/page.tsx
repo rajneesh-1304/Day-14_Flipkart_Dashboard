@@ -1,21 +1,27 @@
-'use client';
+"use client";
 
-import { useEffect, useState } from 'react';
-import { Snackbar, Alert } from '@mui/material';
-import { useAppDispatch, useAppSelector } from '@/app/lib/hooks';
-import './seller.css';
-import { banUserThunk, unbanUserThunk, fetchAllUsersThunk } from '@/app/redux/features/users/userSlice';
+import { useEffect, useState } from "react";
+import { Snackbar, Alert } from "@mui/material";
+import { useAppDispatch, useAppSelector } from "@/app/lib/hooks";
+import "./seller.css";
+import {
+  banUserThunk,
+  unbanUserThunk,
+  fetchAllUsersThunk,
+} from "@/app/redux/features/users/userSlice";
 
 export default function SellersPage() {
   const dispatch = useAppDispatch();
 
-  const { userData, loading } = useAppSelector(state => state.users);
+  const { userData, loading } = useAppSelector((state) => state.users);
 
-  const sellersOnly = userData.filter(user => user.role === 'SELLER');
+  const sellersOnly = userData.filter((user: any) => user.role === "SELLER");
 
   const [snackbarOpen, setSnackbarOpen] = useState(false);
-  const [snackbarMsg, setSnackbarMsg] = useState('');
-  const [snackbarType, setSnackbarType] = useState<'success' | 'error'>('success');
+  const [snackbarMsg, setSnackbarMsg] = useState("");
+  const [snackbarType, setSnackbarType] = useState<"success" | "error">(
+    "success",
+  );
 
   useEffect(() => {
     dispatch(fetchAllUsersThunk());
@@ -30,15 +36,20 @@ export default function SellersPage() {
       result = await dispatch(banUserThunk(seller.id));
     }
 
-    if (banUserThunk.fulfilled.match(result) || unbanUserThunk.fulfilled.match(result)) {
+    if (
+      banUserThunk.fulfilled.match(result) ||
+      unbanUserThunk.fulfilled.match(result)
+    ) {
       setSnackbarMsg(
-        seller.is_banned ? 'Seller unbanned successfully' : 'Seller banned successfully'
+        seller.is_banned
+          ? "Seller unbanned successfully"
+          : "Seller banned successfully",
       );
-      setSnackbarType('success');
+      setSnackbarType("success");
       dispatch(fetchAllUsersThunk());
     } else {
-      setSnackbarMsg(result.payload as string || 'Action failed');
-      setSnackbarType('error');
+      setSnackbarMsg((result.payload as string) || "Action failed");
+      setSnackbarType("error");
     }
 
     setSnackbarOpen(true);
@@ -51,7 +62,7 @@ export default function SellersPage() {
       {!sellersOnly.length ? (
         <div className="admin-empty">No sellers found</div>
       ) : (
-        sellersOnly.map(seller => (
+        sellersOnly.map((seller: any) => (
           <div key={seller.id} className="admin-row">
             <div>
               <strong>{seller.name}</strong>
@@ -59,11 +70,11 @@ export default function SellersPage() {
             </div>
 
             <button
-              className={seller.is_banned ? 'btn-unban' : 'btn-ban'}
+              className={seller.is_banned ? "btn-unban" : "btn-ban"}
               onClick={() => handleBanToggle(seller)}
               disabled={loading}
             >
-              {seller.is_banned ? 'Unban' : 'Ban'}
+              {seller.is_banned ? "Unban" : "Ban"}
             </button>
           </div>
         ))
@@ -73,7 +84,7 @@ export default function SellersPage() {
         open={snackbarOpen}
         autoHideDuration={2500}
         onClose={() => setSnackbarOpen(false)}
-        anchorOrigin={{ vertical: 'bottom', horizontal: 'center' }}
+        anchorOrigin={{ vertical: "bottom", horizontal: "center" }}
       >
         <Alert
           onClose={() => setSnackbarOpen(false)}

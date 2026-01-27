@@ -1,9 +1,21 @@
-'use client';
-import './sellercard.css'
-import React from 'react';
-import { useRouter } from 'next/navigation';
+"use client";
+import "./sellercard.css";
+import React from "react";
+import { useRouter } from "next/navigation";
 
-const Card = ({
+interface CardProps {
+  id: number | string;
+  title: string;
+  description: string;
+  price: number;
+  category: string;
+  subcategory: string;
+  quantity: number;
+  rating: number;
+  images: string[];
+}
+
+const Card: React.FC<CardProps> = ({
   id,
   title,
   description,
@@ -37,11 +49,11 @@ const Card = ({
 
       <div className="price">
         <p className="amount">${price}</p>
-        <p className='rating'>{rating}</p>
+        <p className="rating">{rating}</p>
       </div>
 
-      <p className={`stock ${quantity > 0 ? 'in' : 'out'}`}>
-        {quantity > 0 ? `In Stock (${quantity})` : 'Out of Stock'}
+      <p className={`stock ${quantity > 0 ? "in" : "out"}`}>
+        {quantity > 0 ? `In Stock (${quantity})` : "Out of Stock"}
       </p>
 
       <button className="product_detail" onClick={handleClick}>

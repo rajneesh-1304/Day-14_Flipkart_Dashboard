@@ -129,7 +129,7 @@ export default function RegisterForm() {
         setSnackbarOpen(true);
       }
     }
-    catch (err) {
+    catch (err: any) {
       setSnackbarMessage(err);
       setSnackbarOpen(true);
     }

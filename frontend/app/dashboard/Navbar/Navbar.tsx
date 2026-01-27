@@ -96,6 +96,12 @@ const Navbar: React.FC<NavbarProps> = ({
         </button>
       )}
 
+      {currentUser?.role === 'CUSTOMER' && (
+        <button className="cart_button" onClick={() => router.push('/wishlist')}>
+          WishList
+        </button>
+      )}
+
       <div className="auth_section">
         {!currentUser ? (
           <button onClick={() => router.push('/login')} className="nav_btn">

@@ -20,6 +20,9 @@ export class OrderItem {
   productId: number;
 
   @Column()
+  sellerId: number;
+
+  @Column()
   productName: string;
 
   @Column({ type: 'decimal', precision: 10, scale: 2 })

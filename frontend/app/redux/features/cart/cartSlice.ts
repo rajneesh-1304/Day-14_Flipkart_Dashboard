@@ -5,6 +5,8 @@ import {
   updateCartItem,
   removeCartItem,
   clearCart,
+  addToWishlist,
+  getWishlist,
 } from './cartService';
 
 
@@ -21,10 +23,29 @@ export const addToCartThunk = createAsyncThunk(
     userId: number;
     productId: number;
     quantity: number;
+    sellerId: number;
   }) => {
     return await addToCart(data);
   }
 );
+
+export const addToWishlistThunk = createAsyncThunk(
+  'wishlist',
+  async(data:{
+     userId: number;
+    productId: number;
+  }) => {
+    return await addToWishlist(data);
+  }
+)
+
+export const fetchWishlistThunk = createAsyncThunk(
+  'wishlist',
+  async(userId: number) => {
+    return await getWishlist(userId);
+  }
+)
+
 
 export const updateQuantityThunk = createAsyncThunk(
   'cart/update',
@@ -54,6 +75,7 @@ const cartSlice = createSlice({
     cart: null as any,
     loading: false,
     error: null as string | null,
+    wishlist: null,
   },
   reducers: {},
   extraReducers: (builder) => {
@@ -85,7 +107,20 @@ const cartSlice = createSlice({
 
       .addCase(clearCartThunk.fulfilled, (state) => {
         state.cart = null;
-      });
+      })
+
+      .addCase(addToWishlistThunk.pending, (state) => {
+        state.loading = true;
+      })
+
+      .addCase(addToWishlistThunk.fulfilled, (state, action)=> {
+        state.wishlist = action.payload;
+      })
+
+      .addCase(addToWishlistThunk.rejected, (state, action) => {
+        state.loading = false;
+        state.error = action.error.message || 'Failed to add in wishlist';
+      })
   },
 });
 

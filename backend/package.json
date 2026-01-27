@@ -22,9 +22,10 @@
     "migration:generate": "npm run typeorm -- migration:generate src/migrations/InitMigration -d src/data-source.ts",
     "migration:create": "npm run typeorm -- migration:create src/migrations/CreateUsersTable",
     "migration:run": "npm run typeorm -- migration:run -d src/data-source.ts",
+    "migration:revert": "npx typeorm migration:revert -d src/data-source.ts",
     "db:drop": "ts-node ./node_modules/typeorm-extension/bin/cli.cjs db:drop",
-    "seed:run": "ts-node ./node_modules/typeorm-extension/bin/cli.cjs seed:run",
-    "seed:create": "ts-node ./node_modules/typeorm-extension/bin/cli.cjs seed:create"
+    "seed:run": "npm run build && npx typeorm-extension seed:run -d dist/src/datasource.js",
+    "seed:revert": "npm run build && npx typeorm-extension seed:revert -d dist/src/datasource.js"
   },
   "dependencies": {
     "@nestjs/common": "^11.0.1",

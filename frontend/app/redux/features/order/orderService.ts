@@ -36,3 +36,8 @@ export const updateOrderStatus = async (
   );
   return res.data;
 };
+
+export const fetchAllOrders= async ()=>{
+  const res=await axios.get(`${BASE_URL}/orders`);
+  return res.data
+}
