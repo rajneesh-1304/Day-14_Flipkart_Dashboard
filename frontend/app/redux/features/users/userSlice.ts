@@ -1,5 +1,4 @@
 import { createSlice, createAsyncThunk, PayloadAction } from "@reduxjs/toolkit";
-import { userService } from './userService'
 import { banUser, fetchAllUsers, loginUser, registerUser, unbanUser } from "./service";
 
 interface User {

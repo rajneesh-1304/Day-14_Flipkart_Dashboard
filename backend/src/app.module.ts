@@ -15,6 +15,10 @@ import { OrderTracking } from './orders/entities/order-tracking.entity';
 import { OrderModule } from './orders/order.module';
 import { Wishlist } from './wishlist/wishlist.entity';
 import { WishlistModule } from './wishlist/wishlist.module';
+import { Images } from './images/image.entity';
+import { Coupons } from './coupons/coupon.entity';
+import { ImageModule } from './images/image.module';
+import { CouponModule } from './coupons/coupon.module';
 
 @Controller()
 class AppController {
@@ -30,8 +34,8 @@ class AppController {
       type: 'postgres',
       host: 'localhost',
       port: 5432,
-      username: 'postgres',
-      password: 'admin',
+      username: 'auth_user',
+      password: 'password123',
       database: 'auth_db',
       entities: [
         User,
@@ -43,6 +47,8 @@ class AppController {
         OrderItem,
         OrderTracking,
         Wishlist,
+        Images,
+        Coupons
       ],
       synchronize: false,
       migrations: [__dirname + '/migrations/*{.ts,.js}'],
@@ -53,6 +59,8 @@ class AppController {
     CartModule,
     OrderModule,
     WishlistModule,
+    ImageModule,
+    CouponModule,
   ],
   controllers: [AppController],
 })

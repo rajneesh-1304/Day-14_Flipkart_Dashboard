@@ -18,6 +18,8 @@ import searchReducer from './features/search/searchSlice'
 import cartReducer from './features/cart/cartSlice'
 import addressReducer from './features/address/addressSlice'
 import orderReducer from './features/order/orderSlice'
+import imageReducer from './features/imageSlice';
+import couponReducer from './features/couponSlice'
 
 const persistConfig = {
   key: "root",
@@ -32,7 +34,9 @@ const rootReducer = combineReducers({
   search:searchReducer,
   cart: cartReducer,
   address: addressReducer,
-  order: orderReducer
+  order: orderReducer,
+  image: imageReducer,
+  coupon: couponReducer,
 });
 
 const persistedReducer = persistReducer(persistConfig, rootReducer);

@@ -13,7 +13,7 @@ import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useRouter } from "next/navigation";
 import "./login.css";
-import { auth, db, provider } from "../../config/firebase";
+import { auth, db, provider } from "../../app/config/firebase";
 import { signInWithPopup } from "firebase/auth";
 import { useDispatch } from "react-redux";
 import { AppDispatch } from "@/app/redux/store";

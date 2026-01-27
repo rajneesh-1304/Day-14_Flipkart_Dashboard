@@ -2,7 +2,7 @@
 
 import React, { useState } from 'react';
 import { useRouter } from 'next/navigation';
-import { useAppSelector, useAppDispatch } from '@/app/lib/hooks';
+import { useAppSelector, useAppDispatch } from '@/app/redux/hooks';
 import { logout } from '@/app/redux/features/users/userSlice';
 import AddProductModal from '../Modal/AddProduct';
 import './navbar.css';

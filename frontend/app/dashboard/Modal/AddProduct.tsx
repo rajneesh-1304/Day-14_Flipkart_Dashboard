@@ -49,6 +49,7 @@ export default function AddProductModal({ onClose }: AddProductModalProps) {
   });
 
   const onSubmit = async (formData: ProductFormData) => {
+    if (!user) return;
     
     const formDataToSend = new FormData();
     formDataToSend.append("title", formData.title);
@@ -59,12 +60,12 @@ export default function AddProductModal({ onClose }: AddProductModalProps) {
     formDataToSend.append("quantity", formData.quantity.toString());
     formDataToSend.append("sellerId", String(user.id));
 
-    Array.from(formData.images).forEach(file => {
+    Array.from(formData.images).forEach((file: any) => {
       formDataToSend.append("images", file);
     });
 
     try {
-      await dispatch(addProductThunk(formDataToSend)).unwrap();
+      await dispatch(addProductThunk(formDataToSend as any)).unwrap();
       setSnackbarMessage("Product added successfully!");
       setSnackbarOpen(true);
       setTimeout(() => {

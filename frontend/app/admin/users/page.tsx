@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from 'react';
 import { Snackbar, Alert } from '@mui/material';
-import { useAppDispatch, useAppSelector } from '@/app/lib/hooks';
+import { useAppDispatch, useAppSelector } from '@/app/redux/hooks';
 import './users.css';
 import { banUserThunk, unbanUserThunk, fetchAllUsersThunk } from '@/app/redux/features/users/userSlice';
 

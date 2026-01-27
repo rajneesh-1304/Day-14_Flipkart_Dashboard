@@ -5,6 +5,8 @@ import {
   getOrderById,
   cancelOrder,
   updateOrderStatus,
+  fetchAllOrders,
+  getOrdersBySellerId
 } from './orderService';
 
 export const placeOrderThunk = createAsyncThunk(
@@ -24,7 +26,7 @@ export const fetchUserOrdersThunk = createAsyncThunk(
 export const fetchAllOrderThunk = createAsyncThunk(
   'orders/fetchAllOrders',
   async () => {
-    return await getAllOrders();
+    return await fetchAllOrders();
   }
 )
 
@@ -41,6 +43,14 @@ export const cancelOrderThunk = createAsyncThunk(
     return await cancelOrder(orderId);
   }
 );
+
+export const fetchOrdersBySellerIdThunk = createAsyncThunk(
+  'orders/fetchBySellerId',
+  async (userId: number) => {
+    return await getOrdersBySellerId(userId);
+  }
+);
+
 
 export const updateOrderStatusThunk = createAsyncThunk(
   'orders/updateStatus',
@@ -103,7 +113,12 @@ const orderSlice = createSlice({
 
       .addCase(updateOrderStatusThunk.fulfilled, (state, action) => {
         state.currentOrder = action.payload;
-      });
+      })
+
+      .addCase(fetchOrdersBySellerIdThunk.fulfilled, (state, action) => {
+        state.orders = action.payload;
+      })
+
   },
 });
 

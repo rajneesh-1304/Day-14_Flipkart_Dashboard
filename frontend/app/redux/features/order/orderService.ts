@@ -41,3 +41,8 @@ export const fetchAllOrders= async ()=>{
   const res=await axios.get(`${BASE_URL}/orders`);
   return res.data
 }
+
+export const getOrdersBySellerId = async (userId: number)=>{
+  const res = await axios.get(`${BASE_URL}/orders/order/${userId}`)
+  return res.data;
+}

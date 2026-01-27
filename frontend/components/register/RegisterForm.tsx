@@ -17,14 +17,14 @@ import IconButton from "@mui/material/IconButton";
 import MenuItem from "@mui/material/MenuItem";
 import Select from "@mui/material/Select";
 import { Visibility, VisibilityOff } from "@mui/icons-material";
-import { auth, provider, db } from "../../config/firebase";
+import { auth, provider, db } from "../../app/config/firebase";
 import { createUserWithEmailAndPassword, signInWithPopup } from "firebase/auth";
 import { collection, addDoc, serverTimestamp, setDoc, doc } from "firebase/firestore";
 import { useRouter } from "next/navigation";
 import { AppDispatch } from "@/app/redux/store";
 import { loginThunk, registerThunk } from "@/app/redux/features/users/userSlice";
 import { FormHelperText } from "@mui/material";
-import '../../register/registerpage.css'
+import './register.css'
 
 const RegisterUserSchema = z.object({
   name: z

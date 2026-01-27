@@ -1,5 +1,5 @@
 'use client';
-import LoginForm from '../components/Login/LoginForm';
+import LoginForm from '../../components/Login/LoginForm';
 import './login.css';
 
 const login = () => {

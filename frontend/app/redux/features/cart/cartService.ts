@@ -43,17 +43,23 @@ export const addToWishlist = async (wishlistData: {
   }
 }
 
-export const getWishlist = async (userId:number)=>{
+export const getWishlist = async (userId: number) => {
   try {
     const url = `http://localhost:3001/wishlist/${userId}`;
     const res = await axios.get(url);
-    console.log(res, 'fasdf')
+
+    if (!Array.isArray(res.data)) {
+      console.warn("Wishlist API did not return an array, defaulting to []");
+      return [];
+    }
+
     return res.data;
   } catch (error) {
     console.error("Error in fetching Wishlist:", error);
-    throw error;
+    return [];
   }
-}
+};
+
 
 export const updateCartItem = async (
   itemId: number,
@@ -90,3 +96,17 @@ export const clearCart = async (userId: number) => {
     throw error;
   }
 };
+
+export const deleteWishlist = async (wishlistData: {
+  userId: number;
+  productId: number;
+}) => {
+  try {
+    const url = `http://localhost:3001/wishlist`;
+    const res = await axios.delete(url, { data: wishlistData });
+    return res.data;
+  } catch (error) {
+    console.error("Error in removing wishlist", error);
+    throw error;
+  }
+}

@@ -1,5 +1,5 @@
 'use client'
-import RegisterForm from '../components/Register/RegisterForm'
+import RegisterForm from '@/components/register/RegisterForm'
 import './registerpage.css'
 
 const register =() => {

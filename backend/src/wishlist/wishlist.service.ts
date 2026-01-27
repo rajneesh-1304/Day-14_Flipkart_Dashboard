@@ -3,57 +3,65 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { DataSource, Repository } from 'typeorm';
 import { Wishlist } from './wishlist.entity';
 import { Products } from 'src/products/product.entity';
-import { error } from 'console';
+import { WishlistDefinition } from './wishlistDTO';
 
 @Injectable()
 export class WishlistService {
-  constructor(private readonly dataSource: DataSource) {}
-  @InjectRepository(Wishlist)
-  private readonly wishlistRepo: Repository<Wishlist>;
+  constructor(
+    private readonly dataSource: DataSource,
+    @InjectRepository(Wishlist)
+    private readonly wishlistRepo: Repository<Wishlist>,
+    @InjectRepository(Products)
+    private readonly productRepo: Repository<Products>,
+  ) {}
 
-  @InjectRepository(Products)
-  private readonly productRepo: Repository<Products>;
+  async addInWishlist(data: WishlistDefinition) {
+    const existingItem = await this.wishlistRepo.findOne({
+      where: { userId: data.userId, productId: data.productId },
+    });
 
-  async addInWishlist(data) {
-    const isPresent = this.wishlistRepo.find({where: {productId : data.productId}});
-    if(isPresent){
-      throw new ConflictException('Item already present');
+    if (existingItem) {
+      throw new ConflictException('Item already present in wishlist');
     }
-    const product = await this.wishlistRepo.create({
+
+    const wishlistItem = this.wishlistRepo.create({
       userId: data.userId,
       productId: data.productId,
     });
 
-    await this.wishlistRepo.save(product);
-    return { message: 'Added in Wishlist' };
+    await this.wishlistRepo.save(wishlistItem);
+    return { message: 'Added to wishlist' };
   }
 
   async getWishlist() {
-    const data = await this.wishlistRepo.find();
-    return data;
+    return await this.wishlistRepo.find();
   }
 
-  async getWishlistById(id: number) {
-    const data = await this.wishlistRepo.find({ where: { userId: id } });
-    const productData: any = [];
-    for (const d of data) {
-      const product = await this.productRepo.findOne({
-        where: { id: d.productId },
-      });
-      if (!product) continue;
-      productData.push(product);
-    }
-    return productData;
+  async getWishlistById(userId: number) {
+    const wishlistItems = await this.wishlistRepo.find({ where: { userId } });
+
+    const products = await Promise.all(
+      wishlistItems.map(async (item) => {
+        const product = await this.productRepo.findOne({
+          where: { id: item.productId },
+        });
+        return product; 
+      }),
+    );
+
+    return products.filter((p): p is Products => p !== null);
   }
 
-  async deleteItem(data) {
+  async deleteItem(data: WishlistDefinition) {
     const item = await this.wishlistRepo.findOne({
-      where: { productId: data.productId },
+      where: { userId: data.userId, productId: data.productId },
     });
+
     if (!item) {
-      throw new NotFoundException('Product not found');
+      throw new NotFoundException('Item not found in wishlist');
     }
+
     await this.wishlistRepo.remove(item);
-    return { message: 'Product removed From Wishlist' };
+    return { message: 'Removed from wishlist' };
   }
 }

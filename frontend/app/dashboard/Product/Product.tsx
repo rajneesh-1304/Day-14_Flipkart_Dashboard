@@ -1,24 +1,52 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { useDispatch } from "react-redux";
-import { useAppSelector } from "@/app/redux/hooks";
+import { useAppDispatch, useAppSelector } from "@/app/redux/hooks";
 import { fetchProductsThunk } from "@/app/redux/features/products/productSlice";
-import { addToCartThunk, addToWishlistThunk } from "@/app/redux/features/cart/cartSlice";
+import { fetchImagesThunk } from "@/app/redux/features/imageSlice";
+import {
+  addToCartThunk,
+  addToWishlistThunk,
+} from "@/app/redux/features/cart/cartSlice";
 import Snackbar from "@mui/material/Snackbar";
 import Alert from "@mui/material/Alert";
 import "./product.css";
 
+interface Product {
+  id: number;
+  title: string;
+  price: number;
+  category: string;
+  subcategory?: string;
+  rating?: number;
+  sellerId: number;
+  images?: string[];
+}
+
+interface Image {
+  id: number;
+  url: string;
+}
+
 const LIMIT = 10;
 
 export default function Product() {
-  const dispatch = useDispatch();
+  const dispatch = useAppDispatch();
 
   const userId = useAppSelector((state) => state.users.currentUser?.id);
-  const products = useAppSelector((state) => state.products.productData);
+
+  const products = useAppSelector(
+    (state) => state.products.productData as Product[]
+  );
+
   const total = useAppSelector((state) => state.products.total);
+
+  const images = useAppSelector(
+    (state) => state.image.images as Image[]
+  );
+
   const { searchValue, category, subcategory } = useAppSelector(
-    (state) => state.search,
+    (state) => state.search
   );
 
   const [snackbar, setSnackbar] = useState<{
@@ -30,9 +58,7 @@ export default function Product() {
     setSnackbar({ message, type });
   };
 
-  const handleCloseSnackbar = () => {
-    setSnackbar(null);
-  };
+  const handleCloseSnackbar = () => setSnackbar(null);
 
   const [page, setPage] = useState(1);
   const totalPages = Math.ceil(total / LIMIT);
@@ -60,89 +86,102 @@ export default function Product() {
         searchValue: debouncedSearch,
         category: debouncedCategory,
         subcategory: debouncedSubcategory,
-      }),
+      })
     );
-  }, [
-    dispatch,
-    page,
-    debouncedSearch,
-    debouncedCategory,
-    debouncedSubcategory,
-  ]);
+  }, [dispatch, page, debouncedSearch, debouncedCategory, debouncedSubcategory]);
+
+  useEffect(() => {
+    dispatch(fetchImagesThunk());
+  }, [dispatch]);
+
 
   const [carouselIndex, setCarouselIndex] = useState(0);
-  const visibleItems = 4;
-  const prevSlide = () => setCarouselIndex((prev) => Math.max(prev - 1, 0));
+  const visibleItems = Math.min(4, images.length);
+
+  const prevSlide = () =>
+    setCarouselIndex((prev) => Math.max(prev - 1, 0));
+
   const nextSlide = () =>
     setCarouselIndex((prev) =>
-      Math.min(prev + 1, products.length - visibleItems),
+      Math.min(prev + 1, images.length - visibleItems)
     );
 
   useEffect(() => {
+    if (images.length === 0) return;
+
     const interval = setInterval(() => {
       setCarouselIndex((prev) =>
-        prev < products.length - visibleItems ? prev + 1 : 0,
+        prev < images.length - visibleItems ? prev + 1 : 0
       );
     }, 3000);
+
     return () => clearInterval(interval);
-  }, [products]);
+  }, [images, visibleItems]);
+
 
   return (
     <div className="home">
-      <div className="relative w-full mb-8">
-        <div className="overflow-hidden">
-          <div
-            className="flex transition-transform duration-500 gap-4"
-            style={{
-              transform: `translateX(-${(100 / visibleItems) * carouselIndex}%)`,
-            }}
-          >
-            {products.map((p, idx) => (
-              <div
-                key={idx}
-                className="flex-shrink-0"
-                style={{ width: `${100 / visibleItems}%` }}
-              >
-                <div className="carousel-card">
-                  <img
-                    src={
-                      Array.isArray(p.images) && p.images.length > 0
-                        ? p.images[0]
-                        : "/no-image.png"
-                    }
-                    alt={p.title}
-                    className="carousel-img"
-                  />
-                  <h3 className="carousel-title">{p.title}</h3>
-                  <p className="carousel-price">₹ {p.price}</p>
+      {images.length > 0 && (
+        <div className="relative w-full mb-8">
+          <div className="overflow-hidden">
+            <div
+              className="flex transition-transform duration-500 gap-4"
+              style={{
+                transform: `translateX(-${
+                  (100 / visibleItems) * carouselIndex
+                }%)`,
+              }}
+            >
+              {images.map((img) => (
+                <div
+                  key={img.id}
+                  className="flex-shrink-0"
+                  style={{ width: `${100 / visibleItems}%` }}
+                >
+                  <div className="carousel-card">
+                    <img
+                      src={img.url}
+                      alt="carousel"
+                      className="carousel-img"
+                    />
+                  </div>
                 </div>
-              </div>
-            ))}
+              ))}
+            </div>
           </div>
-        </div>
-        <button onClick={prevSlide} className="carousel-btn left">
-          &#10094;
-        </button>
-        <button onClick={nextSlide} className="carousel-btn right">
-          &#10095;
-        </button>
-      </div>
 
+          <button onClick={prevSlide} className="carousel-btn left">
+            &#10094;
+          </button>
+          <button onClick={nextSlide} className="carousel-btn right">
+            &#10095;
+          </button>
+        </div>
+      )}
+
+      {/* 🔹 PRODUCT GRID */}
       <div className="prod">
         {products.length > 0 ? (
-          products.map((p, idx) => (
-            <div className="card" key={idx}>
+          products.map((p) => (
+            <div className="card" key={p.id}>
               <div className="card_image">
-                <img className="card_img" src={p.images} alt={p.title} />
+                <img
+                  className="card_img"
+                  src={p.images?.[0] ?? "/no-image.png"}
+                  alt={p.title}
+                />
               </div>
+
               <div className="card_body">
                 <h3 className="property">{p.title}</h3>
                 <p className="category">{p.category}</p>
+
                 <div className="price">
                   <span className="amount">₹ {p.price}</span>
                   <span className="rating">⭐ {p.rating || 0}</span>
                 </div>
-                <div style={{ display: "flex", gap: "3px" }}>
+
+                <div style={{ display: "flex", gap: "6px" }}>
                   <button
                     className="add_to_cart_btn"
                     onClick={async () => {
@@ -157,17 +196,17 @@ export default function Product() {
                             productId: p.id,
                             quantity: 1,
                             sellerId: p.sellerId,
-                          }),
+                          })
                         ).unwrap();
                         showSnackbar("Added to cart ✅", "success");
-                      } catch (error) {
+                      } catch {
                         showSnackbar("Failed to add to cart ❌", "error");
-                        console.error(error);
                       }
                     }}
                   >
                     Add to Cart
                   </button>
+
                   <button
                     className="add_to_cart_btn"
                     onClick={async () => {
@@ -176,11 +215,18 @@ export default function Product() {
                         return;
                       }
                       try {
-                        await dispatch(addToWishlistThunk({userId, productId: p.id}),)
-                        showSnackbar("Added to wishlist ✅", "success")
-                      } catch (error) {
-                        showSnackbar("Failed to add to wishlist ❌", "error");
-                        console.error(error,'fasdfa');
+                        await dispatch(
+                          addToWishlistThunk({
+                            userId,
+                            productId: p.id,
+                          })
+                        ).unwrap();
+                        showSnackbar("Added to wishlist ✅", "success");
+                      } catch {
+                        showSnackbar(
+                          "Already present in wishlist ❌",
+                          "error"
+                        );
                       }
                     }}
                   >
@@ -195,6 +241,7 @@ export default function Product() {
         )}
       </div>
 
+      {/* 🔹 PAGINATION */}
       {totalPages > 1 && (
         <div className="pagination">
           <button disabled={page === 1} onClick={() => setPage((p) => p - 1)}>
@@ -212,7 +259,7 @@ export default function Product() {
         </div>
       )}
 
-      {/* MUI Snackbar */}
+      {/* 🔹 SNACKBAR */}
       <Snackbar
         open={!!snackbar}
         autoHideDuration={3000}
@@ -224,7 +271,7 @@ export default function Product() {
           severity={snackbar?.type || "success"}
           sx={{ width: "100%" }}
         >
-          {snackbar?.message || ""}
+          {snackbar?.message}
         </Alert>
       </Snackbar>
     </div>

@@ -54,7 +54,10 @@ export const addProductThunk = createAsyncThunk(
   }
 );
 
-export const getProductThunk = createAsyncThunk(
+export const getProductThunk = createAsyncThunk<
+  any,
+  { limit?: number; skip?: number; searchVal?: string; searchProd?: string }
+>(
   'products',
   async ({ limit, skip, searchVal, searchProd }) => {
     try {

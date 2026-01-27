@@ -305,6 +305,20 @@
   pointer-events: auto;
 }
 
+.coupon-input {
+  padding: 8px;
+  width: 65%;
+}
+
+.apply-coupon-btn {
+  padding: 8px 12px;
+  background: #2874f0;
+  color: #fff;
+  border: none;
+  cursor: pointer;
+}
+
+
 .snackbar.success {
   background-color: #4caf50;
 }
@@ -324,3 +338,4 @@
     padding: 20px 15px;
   }
 }
+

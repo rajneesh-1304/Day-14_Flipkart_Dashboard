@@ -3,7 +3,6 @@ import {
   getSellerProducts,
   addProduct,
   deleteProduct,
-  updateProduct,
   getProductById,
 } from './sellerService';
 
@@ -21,7 +20,7 @@ export interface Product {
 
 interface SellerProductState {
   products: Product[];
-  product:null,
+  product: Product | null,
   loading: boolean;
   error: string | null;
   total: number;
@@ -30,7 +29,7 @@ interface SellerProductState {
 
 const initialState: SellerProductState = {
   products: [],
-  product:null,
+  product: null,
   loading: false,
   error: null,
   total: 0,

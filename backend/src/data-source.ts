@@ -8,13 +8,15 @@ import { Order } from './orders/entities/order.entity';
 import { OrderItem } from './orders/entities/order-item.entity';
 import { OrderTracking } from './orders/entities/order-tracking.entity';
 import { Wishlist } from './wishlist/wishlist.entity';
+import { Images } from './images/image.entity';
+import { Coupons } from './coupons/coupon.entity';
 
 const rawDataSourceOptions = {
   type: 'postgres',
   host: 'localhost',
   port: 5432,
-  username: 'postgres',
-  password: 'admin',
+  username: 'auth_user',
+  password: 'password123',
   database: 'auth_db',
   synchronize: false,
   entities: [
@@ -27,6 +29,8 @@ const rawDataSourceOptions = {
     OrderItem,
     OrderTracking,
     Wishlist,
+    Images,
+    Coupons,
   ],
   seeds: ['dist/src/seeds/**/*.js'],
   migrations: ['dist/src/migrations/*.js'],
