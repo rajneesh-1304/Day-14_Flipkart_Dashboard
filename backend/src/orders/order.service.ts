@@ -10,7 +10,7 @@ import { CartItem } from '../cart/entities/cartitem.entity';
 import { Order } from './entities/order.entity';
 import { OrderItem } from './entities/order-item.entity';
 import { OrderTracking } from './entities/order-tracking.entity';
-import { Products } from 'src/products/product.entity';
+import { Products } from '../products/product.entity';
 
 @Injectable()
 export class OrderService {

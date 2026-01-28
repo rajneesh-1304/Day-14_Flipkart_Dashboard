@@ -2,7 +2,7 @@ import { ConflictException, Injectable, NotFoundException } from '@nestjs/common
 import { InjectRepository } from '@nestjs/typeorm';
 import { DataSource, Repository } from 'typeorm';
 import { Wishlist } from './wishlist.entity';
-import { Products } from 'src/products/product.entity';
+import { Products } from '../products/product.entity';
 import { WishlistDefinition } from './wishlistDTO';
 
 @Injectable()

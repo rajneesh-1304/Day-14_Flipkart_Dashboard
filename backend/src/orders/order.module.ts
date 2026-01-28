@@ -7,7 +7,7 @@ import { OrderTracking } from "./entities/order-tracking.entity";
 import { OrderItem } from "./entities/order-item.entity";
 import { Cart } from "src/cart/entities/cart.entity";
 import { CartItem } from "src/cart/entities/cartitem.entity";
-import { Products } from "src/products/product.entity";
+import { Products } from "../products/product.entity";
 
 @Module({
     imports: [TypeOrmModule.forFeature([Order, OrderTracking, OrderItem, Cart, CartItem, Products])],

@@ -4,7 +4,7 @@ import { CartService } from "./cart.service";
 import { TypeOrmModule } from "@nestjs/typeorm";
 import { Cart } from "./entities/cart.entity";
 import { CartItem } from "./entities/cartitem.entity";
-import { Products } from "src/products/product.entity";
+import { Products } from "../products/product.entity";
 
 @Module({
     imports: [TypeOrmModule.forFeature([Cart, CartItem, Products])],

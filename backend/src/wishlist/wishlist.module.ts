@@ -3,7 +3,7 @@ import { TypeOrmModule } from '@nestjs/typeorm';
 import { WishlistController } from './wishlist.controller';
 import { WishlistService } from './wishlist.service';
 import { Wishlist } from './wishlist.entity';
-import { Products } from 'src/products/product.entity';
+import { Products } from '../products/product.entity';
 
 @Module({
   imports: [TypeOrmModule.forFeature([Wishlist, Products])],
