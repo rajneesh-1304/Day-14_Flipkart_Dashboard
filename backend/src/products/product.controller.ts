@@ -29,7 +29,12 @@ export class ProductController {
   }
 
   @Patch('update/:id')
-  updateProduct(@Param() id: number, @Body() productData: Products, @UploadedFiles() files: Express.Multer.File[],) {
+  @UseInterceptors(FilesInterceptor("images", 5, { storage: productImageStorage }))
+  updateProduct(
+    @Param('id') id: number,
+    @Body() productData: Products,
+    @UploadedFiles() files: Express.Multer.File[]
+  ) {
     return this.productService.updateProduct(id, productData, files);
   }
 
@@ -44,12 +49,12 @@ export class ProductController {
   }
 
   @Get(':id')
-  getProductDetail(@Param('id') id: string){
+  getProductDetail(@Param('id') id: string) {
     return this.productService.getProductDetail(+id);
   }
 
   @Delete(':id')
-  deleteProduct(@Param('id') id: string){
+  deleteProduct(@Param('id') id: string) {
     return this.productService.deleteProduct(+id);
   }
 }
