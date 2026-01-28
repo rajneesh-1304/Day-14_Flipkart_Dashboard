@@ -5,8 +5,8 @@ import { TypeOrmModule } from "@nestjs/typeorm";
 import { Order } from "./entities/order.entity";
 import { OrderTracking } from "./entities/order-tracking.entity";
 import { OrderItem } from "./entities/order-item.entity";
-import { Cart } from "src/cart/entities/cart.entity";
-import { CartItem } from "src/cart/entities/cartitem.entity";
+import { Cart } from "../cart/entities/cart.entity";
+import { CartItem } from "../cart/entities/cartitem.entity";
 import { Products } from "../products/product.entity";
 
 @Module({
