@@ -12,7 +12,7 @@ export class OrderTracking {
   @PrimaryGeneratedColumn()
   id: number;
 
-  @ManyToOne(() => Order, order => order.tracking, {
+  @ManyToOne(() => Order, (order) => order.tracking, {
     onDelete: 'CASCADE',
   })
   order: Order;

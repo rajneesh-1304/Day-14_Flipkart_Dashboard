@@ -36,17 +36,15 @@ export default function Product() {
   const userId = useAppSelector((state) => state.users.currentUser?.id);
 
   const products = useAppSelector(
-    (state) => state.products.productData as Product[]
+    (state) => state.products.productData as Product[],
   );
 
   const total = useAppSelector((state) => state.products.total);
 
-  const images = useAppSelector(
-    (state) => state.image.images as Image[]
-  );
+  const images = useAppSelector((state) => state.image.images as Image[]);
 
   const { searchValue, category, subcategory } = useAppSelector(
-    (state) => state.search
+    (state) => state.search,
   );
 
   const [snackbar, setSnackbar] = useState<{
@@ -86,24 +84,28 @@ export default function Product() {
         searchValue: debouncedSearch,
         category: debouncedCategory,
         subcategory: debouncedSubcategory,
-      })
+      }),
     );
-  }, [dispatch, page, debouncedSearch, debouncedCategory, debouncedSubcategory]);
+  }, [
+    dispatch,
+    page,
+    debouncedSearch,
+    debouncedCategory,
+    debouncedSubcategory,
+  ]);
 
   useEffect(() => {
     dispatch(fetchImagesThunk());
   }, [dispatch]);
 
-
   const [carouselIndex, setCarouselIndex] = useState(0);
   const visibleItems = Math.min(4, images.length);
 
-  const prevSlide = () =>
-    setCarouselIndex((prev) => Math.max(prev - 1, 0));
+  const prevSlide = () => setCarouselIndex((prev) => Math.max(prev - 1, 0));
 
   const nextSlide = () =>
     setCarouselIndex((prev) =>
-      Math.min(prev + 1, images.length - visibleItems)
+      Math.min(prev + 1, images.length - visibleItems),
     );
 
   useEffect(() => {
@@ -111,13 +113,12 @@ export default function Product() {
 
     const interval = setInterval(() => {
       setCarouselIndex((prev) =>
-        prev < images.length - visibleItems ? prev + 1 : 0
+        prev < images.length - visibleItems ? prev + 1 : 0,
       );
     }, 3000);
 
     return () => clearInterval(interval);
   }, [images, visibleItems]);
-
 
   return (
     <div className="home">
@@ -196,7 +197,7 @@ export default function Product() {
                             productId: p.id,
                             quantity: 1,
                             sellerId: p.sellerId,
-                          })
+                          }),
                         ).unwrap();
                         showSnackbar("Added to cart ✅", "success");
                       } catch {
@@ -219,14 +220,11 @@ export default function Product() {
                           addToWishlistThunk({
                             userId,
                             productId: p.id,
-                          })
+                          }),
                         ).unwrap();
                         showSnackbar("Added to wishlist ✅", "success");
                       } catch {
-                        showSnackbar(
-                          "Already present in wishlist ❌",
-                          "error"
-                        );
+                        showSnackbar("Already present in wishlist ❌", "error");
                       }
                     }}
                   >

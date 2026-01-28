@@ -9,9 +9,9 @@ import { Products } from './product.entity';
 
 @Injectable()
 export class ProductService {
-  constructor(private readonly dataSource: DataSource) { }
+  constructor(private readonly dataSource: DataSource) {}
 
-  async addProduct(prodData, files: Express.Multer.File[],) {
+  async addProduct(prodData, files: Express.Multer.File[]) {
     if (!prodData.title || prodData.title.trim() === '') {
       throw new BadRequestException('Product title is required');
     }
@@ -60,7 +60,7 @@ export class ProductService {
   }
 
   async getProducts(query: any) {
-    console.log('query', query)
+    console.log('query', query);
     const limit = Number(query?.limit) || 10;
     const page = Number(query?.page) || 1;
     const skip = (page - 1) * limit;
@@ -79,19 +79,13 @@ export class ProductService {
       });
     }
 
-    if (
-      query?.category &&
-      query.category !== 'undefined'
-    ) {
+    if (query?.category && query.category !== 'undefined') {
       qb.andWhere('product.category = :category', {
         category: query.category,
       });
     }
 
-    if (
-      query?.subcategory &&
-      query.subcategory !== 'undefined'
-    ) {
+    if (query?.subcategory && query.subcategory !== 'undefined') {
       qb.andWhere('product.subcategory = :subcategory', {
         subcategory: query.subcategory,
       });
@@ -110,9 +104,8 @@ export class ProductService {
     return { data, total };
   }
 
-
   async updateProduct(productId, productData, files?: Express.Multer.File[]) {
-    const id = Number(productId.id);
+    const id = Number(productId);
     if (!id) {
       throw new BadRequestException('Product id is not present');
     }
@@ -125,9 +118,9 @@ export class ProductService {
     const existProduct = await prodRepo.findOne({ where: { id } });
 
     if (!existProduct) throw new ConflictException('Product does not exist.');
-    const imageUrls = files?.map(
-      (file) => `http://localhost:3001/uploads/${file.filename}`,
-    ) || [];
+    const imageUrls =
+      files?.map((file) => `http://localhost:3001/uploads/${file.filename}`) ||
+      [];
 
     productData.images = [...(existProduct.images || []), ...imageUrls];
     await prodRepo.update(productId, productData);
@@ -161,23 +154,22 @@ export class ProductService {
   }
 
   async banProduct(id: number) {
-  const prodRepo = this.dataSource.getRepository(Products);
-  const product = await prodRepo.findOne({ where: { id } });
-  if (!product) throw new NotFoundException("Product not found");
+    const prodRepo = this.dataSource.getRepository(Products);
+    const product = await prodRepo.findOne({ where: { id } });
+    if (!product) throw new NotFoundException('Product not found');
 
-  product.isActive = false;
-  await prodRepo.save(product); 
-  return product; 
-}
+    product.isActive = false;
+    await prodRepo.save(product);
+    return product;
+  }
 
-async unbanProduct(id: number) {
-  const prodRepo = this.dataSource.getRepository(Products);
-  const product = await prodRepo.findOne({ where: { id } });
-  if (!product) throw new NotFoundException("Product not found");
+  async unbanProduct(id: number) {
+    const prodRepo = this.dataSource.getRepository(Products);
+    const product = await prodRepo.findOne({ where: { id } });
+    if (!product) throw new NotFoundException('Product not found');
 
-  product.isActive = true;
-  await prodRepo.save(product);
-  return product; 
-}
-
+    product.isActive = true;
+    await prodRepo.save(product);
+    return product;
+  }
 }

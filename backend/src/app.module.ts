@@ -34,8 +34,8 @@ class AppController {
       type: 'postgres',
       host: 'localhost',
       port: 5432,
-      username: 'auth_user',
-      password: 'password123',
+      username: 'postgres',
+      password: 'admin',
       database: 'auth_db',
       entities: [
         User,
@@ -48,7 +48,7 @@ class AppController {
         OrderTracking,
         Wishlist,
         Images,
-        Coupons
+        Coupons,
       ],
       synchronize: false,
       migrations: [__dirname + '/migrations/*{.ts,.js}'],

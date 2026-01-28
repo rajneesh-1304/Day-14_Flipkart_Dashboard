@@ -46,7 +46,7 @@ export default function CustomersPage() {
   };
 
   return (
-    <div className="admin-container">
+    <div className="admin-containerrrr">
       <h1 className="admin-title">Customer Management</h1>
 
       {!customersOnly.length ? (

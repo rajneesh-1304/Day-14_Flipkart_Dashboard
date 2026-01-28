@@ -15,7 +15,7 @@ export default function SellersPage() {
 
   const { userData, loading } = useAppSelector((state) => state.users);
 
-  const sellersOnly = userData.filter((user: any) => user.role === "SELLER");
+  const sellersOnly = userData?.filter((user: any) => user.role === "SELLER");
 
   const [snackbarOpen, setSnackbarOpen] = useState(false);
   const [snackbarMsg, setSnackbarMsg] = useState("");
@@ -56,10 +56,10 @@ export default function SellersPage() {
   };
 
   return (
-    <div className="admin-container">
+    <div className="admin-containerrr">
       <h1 className="admin-title">Seller Management</h1>
 
-      {!sellersOnly.length ? (
+      {!sellersOnly?.length ? (
         <div className="admin-empty">No sellers found</div>
       ) : (
         sellersOnly.map((seller: any) => (

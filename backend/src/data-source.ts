@@ -15,8 +15,8 @@ const rawDataSourceOptions = {
   type: 'postgres',
   host: 'localhost',
   port: 5432,
-  username: 'auth_user',
-  password: 'password123',
+  username: 'postgres',
+  password: 'admin',
   database: 'auth_db',
   synchronize: false,
   entities: [

@@ -1,5 +1,5 @@
 import { createSlice, createAsyncThunk, PayloadAction } from "@reduxjs/toolkit";
-import { addProduct, banProduct, getProducts, unbanProduct } from "./productService";
+import { addProduct, banProduct, deleteProduct, getProducts, unbanProduct, updateProduct } from "./productService";
 
 interface Product {
   id: number;
@@ -46,8 +46,21 @@ export const addProductThunk = createAsyncThunk(
   "products/addproduct",
   async (productData, { rejectWithValue }) => {
     try {
-      console.log('aaa', productData)
       return await addProduct(productData);
+    } catch (err: any) {
+      return rejectWithValue(err.response.data.message);
+    }
+  }
+);
+
+export const updateProductThunk = createAsyncThunk<
+  any,
+  { id?: any; formData: any }
+>(
+  "products/updateproduct",
+  async ({id, formData}, { rejectWithValue }) => {
+    try {
+      return await updateProduct(id, formData);
     } catch (err: any) {
       return rejectWithValue(err.response.data.message);
     }
@@ -89,6 +102,19 @@ export const unbanProductThunk = createAsyncThunk(
     } catch (err: any) {
       return rejectWithValue(
         err.response?.data?.message || 'Failed to unban product'
+      );
+    }
+  }
+);
+
+export const deleteProductThunk = createAsyncThunk(
+  'products/deleteProduct',
+  async (productId: number | string, { rejectWithValue }) => {
+    try {
+      return await deleteProduct(productId);
+    } catch (err: any) {
+      return rejectWithValue(
+        err.response?.data?.message || 'Failed to delete product'
       );
     }
   }

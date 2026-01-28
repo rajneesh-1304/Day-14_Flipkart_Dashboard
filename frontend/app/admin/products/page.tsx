@@ -16,7 +16,7 @@ export default function ProductsPage() {
   const products = useAppSelector(state =>
   state.products.productData.map((p: any) => ({
     ...p,
-    is_banned: !p.isActive,
+    isActive: !p.isActive,
   }))
 );
 
@@ -36,7 +36,7 @@ export default function ProductsPage() {
 
   const handleBanToggle = async (product: any) => {
     let result;
-    if (product.is_banned) {
+    if (product.isActive) {
       result = await dispatch(unbanProductThunk(product.id));
     } else {
       result = await dispatch(banProductThunk(product.id));
@@ -47,10 +47,10 @@ export default function ProductsPage() {
       unbanProductThunk.fulfilled.match(result)
     ) {
       setSnackbarMsg(
-        product.is_banned ? 'Product unbanned successfully' : 'Product banned successfully'
+        product.is_Active ? 'Product unbanned successfully' : 'Product banned successfully'
       );
       setSnackbarType('success');
-      fetchProducts(page); // refresh current page
+      fetchProducts(page); 
     } else {
       setSnackbarMsg(result.payload as string || 'Action failed');
       setSnackbarType('error');
@@ -58,11 +58,10 @@ export default function ProductsPage() {
 
     setSnackbarOpen(true);
   };
-
   const totalPages = Math.ceil(total / limit);
 
   return (
-    <div className="admin-container" style={{ marginTop: '50px' }}>
+    <div className="admin-containerr" style={{ marginTop: '50px' }}>
       <h1 className="admin-title">Product Management</h1>
 
       {!products?.length ? (
@@ -70,6 +69,7 @@ export default function ProductsPage() {
       ) : (
         <>
           {products.map((product : any) => (
+            
             <div key={product.id} className="admin-row">
               <div className="admin-info">
                 <strong>{product.title}</strong>
@@ -80,11 +80,11 @@ export default function ProductsPage() {
               </div>
 
               <button
-                className={product.is_banned ? 'btn-unban' : 'btn-ban'}
+                className={product.isActive ? 'btn-unban' : 'btn-ban'}
                 onClick={() => handleBanToggle(product)}
                 disabled={loading}
               >
-                {product.is_banned ? 'Unban' : 'Ban'}
+                {product.isActive ? 'Unban' : 'Ban'}
               </button>
             </div>
           ))}
